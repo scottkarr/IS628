@@ -1,0 +1,2392 @@
+---
+title: 'Preserving "Merit" and Redressing "Underrepresentation" in New York City''s Specialized High Schools'
+author: "Scott Karr"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  pdf_document:
+    extra_dependencies: flafter
+    toc: yes
+---
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# Initial setup
+library(alr3)
+library(bestglm)
+library(car)
+library(data.table)
+library(dplyr)
+library(DT)
+library(ggplot2)
+library(grid)
+library(gridBase)
+library(gridExtra)
+library(Hmisc)
+library(htmltools)
+library(imager)
+library(kableExtra)
+library(knitr)
+library(leaflet)
+library(lmtest)
+library(mpath)
+library(performance)
+library(pROC)
+library(pscl)
+library(psych)
+library(reshape2)
+library(stringr)
+library(summarytools)
+library(see)
+library(tidyr)
+library(utils)
+```
+
+\newpage
+
+***
+
+# Abstract
+
+The use of high-stakes testing as a fundamental determinant of students' future prospects in the public education system is a well established phenomenon. Jonathan Supovitz’s article in The Journal of Educational Change offers four major theories that suggest why this is: *Motivational theory*, which argues that test-based accountability can catalyze improvement; *Alignment theory*, which argues that test-based accountability can enable structural consistency among major components of the educational system; *Information theory*, which tells us that analytics can be used as a feedback mechanism to drive performance improvements; and *Symbolism*, which emphasizes that systems of accountability signal important values to stakeholders ^[Supovitz, J. (2010). Is high-stakes testing working? @Penn GSE A Review of Research, 7(2), 3-8. Retrieved from http://www.gse.upenn.edu/review/feature/supovitz]. 
+
+New York City's nine specialized high schools (SPHS) have a long history serving the educational needs of students who excel academically and/or artistically. These schools are also a crucible for evaluating the effectiveness of high school placement exams in measuring merit and in providing access to qualified yet underrepresented populations of the city.  All students eligible to attend city high schools have the option of applying to one of these specialized schools. Only applicants to the Fiorello H. LaGuardia High School of Music & Art and Performing Arts are evaluated on the basis of their portfolio, a studio audition and a review of their academic record. For the other eight specialized high schools, admissions is based soley on the Specialized High Schools Admissions Test (SHSAT) ^["Specialized High Schools". NYC Department of Education. 2021. Retrieved January 04, 2021.  Retrieved from https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/specialized-high-schools]. 
+
+This paper looks at 570 middle schools and examines factors that contribute to students passing the New York City Specialized High School exam (SHSAT) which determines offers of acceptance to eight of these nine coveted schools.  Also explored is the use of the New York State Tests as an altenative that is taken by a much larger proportion of the student population and is more closely aligned with the NYCDOE curriculum. The goal of this research is to predict both the likelihood a middle school will have SPHS acceptances, the number of SPHS acceptances and the factors that drive these offers.  Predictive models were constructed based upon theoretical constructs (categorized by economic, behavioral, demographic, geographic and performance factors) to gauge their impact on SPHS acceptances.  The objective is to model an SPHS admissions process that preserves academic merit and also represents the city's diverse popuation more equitably.
+
+## Key Words:  
+High-Stakes Testing, SHSAT, Ranked Choice Selection, School Choice, Predictive Modeling, Behavioral Economics
+
+\newpage
+
+***
+
+# Introduction
+
+School choice in public education has historically been a matter of local control, but over time this has been challenged based on the notion that local schools supported by property taxes are inequitable because school quality becomes dependent on the “wealth of one’s neighbors.” ^[Fleeter, Howard B. "The Impact of Local Tax-Based Sharing on School Finance Equity in Ohio; Implementation Issues and Comparative Analysis." Journal of Education Finance 20, no. 3 (1995): 270-301. Accessed January 16, 2021. http://www.jstor.org/stable/40703928.] In recent decades the debate has shifted toward accountability and representation. While local control is still a factor, the New York City Department of Education (NYCDOE) for the past several years assigns students to high schools using an algorhithmic matching system based on several factors including preference, attendance record, geography, and performance on the New York State test scores ^[Supovitz, J.A. & Klein, V. (2003). Mapping a course for improved student learning: How innovative schools systematically use student performance data to guide improvement. Philadelphia, PA: Consortium for Policy Research in Wiliam, D., & Leahy, S. (2006, April). A theoretical foundation for formative assessment. Paper presented at the National Council on Measurement in Education, San Francisco.].  The Specialized High School Admissions process in particular--which is soley based on the Specialized High School Admissions Test (SHSAT)--is indicative of this merit-based approach to assigning schools and has elevated the importance of testing.  Given this context, the following research attempts to answer three significant questions:
+
+- Is it possible to accurately predict SPHS feeder middle schools using factors derived from the Literature Review on high stakes testing?
+
+- For middle schools predicted to be SPHS feeders, can the number of students accepted be accurately predicted?
+
+- How can feeder middle schools be more representative of the city's diverse demographics and yet preserve their reputation of academic merit?
+
+More broadly implied by these research questions is improvement of the NYCDOE’s selection process for high school. For example, if a middle school is lacking in the number and diversity of students that get SPHS offers, this could signal an evaluation of how that school is aligned to the curriculum so as to improve upon the school's performance. In this way the high school selection can benefit from this information feedback loop to improve SPHS acceptances, diversity and improved academic acheivement.
+
+# Literature Review
+
+The literature review identifies policy strategies implicit in the NYCDOE use of high-stakes testing to determine high school acceptances. Variations of these same strategies may be more broadly applicable to the overall high school selection process.  Several such strategies were evalutated and modeled for predicting which feeder middle schools lead to SPHS acceptances. Of those reviewed, a few were chosen as being most tractable to the data set's predictor variables. This approach is the basis for testing theories as described in the literature and integrating them into the models that were chosen.
+
+The literature presents challenges in translating to linkages with the data set but can be surmized by classifying the dataset's predictor variables and matching each to a theoretical contruct. The table below summarizes these relationships.  To facilitate this research extensive use of the NYC Department of Education (NYCDOE) Information Hub. ^["Test Results". NYC Department of Education. 2021. Retrieved January 04, 2021. Retrieved from https://infohub.nyced.org/reports/academics/test-results] and PASSNYC ^[Yiping, Lai (2018) Target Schools & Action Recommended for PASSNYC. Retrieved January 04, 2021. "https://www.kaggle.com/laiyipeng/target-schools-action-recommended-for-passnyc] was made to access data related to 591 middle school records that could potentially be feeder schools to the New York City Specialized High Schools. This data includes information on the number of testers, offers, demographics, economics, geography and performance factors and served as the basis for the research discussed herein.
+
+### Variable Classification
+
+The predictor variables in this study break-down along lines of related qualatative measures.  For example, all the behavioral predictors were compiled from family surveys issued by the NYCDOE.  Behavioral measures also have significant zero-inflated distributions likely indicative of non-responsiveness to surveys.
+
+Finally, the extent to which any particular predictor influences the overall model is indicated by the correlation matrix at the end of part 1 and the coefficients of the multiple regression models in part 3.  Theoretical Constructs associated with specific predictors have been included to provide some explanatory value regarding how those predictors influence SPHS acceptances.
+
+  * **Geographic** - Most of these variables are political boundaries and their numerical values are not ranked catagorical measurements. 'LATITUDE', 'LONGITUDE', 'BOROUGH', 'DBN', 'ZIPCODE', 'COMMUNITY_SCHOOL'.
+  
+  * **Economic** - These related variables reflect both the actual funding per school and the students’ need for funding.  Economic Need and Income are inversely related factors.  'ECONOMIC_NEED_INDX', 'INCOME'.
+  
+  * **Behavioral** – These related variables are mainly responses based upon yearly survey sent to families by the NYC DOE.  As indicated in part 2, the zero-inflated distributions likely reflect missing information on surveys.  'PCT_ATTENDANCE', 'PCT_TRUST', 'PCT_EFFECTIVE', 'PCT_SUPPORTIVE', 'PCT_ABSENCES', 'PCT_RIGOROUS', 'PCT_COLLABORATIVE', 'PCT_FAMILY_TIES', 'PTRATIO', 'CLASS_SIZE'.
+  
+  * **Demographic** - These related variables are proxies for underrepresentation indicating racial, ethnic, gender and language breakdown per school.  'PCT_BLACK', 'PCT_HISPANIC', 'PCT_ELL', 'PCT_WHITE', 'PCT_ASIAN', 'PCT_FEMALE', 'SPHS_APPLICANTS', 'SPHS_TESTERS', 'PCT_4S_UNDRRP'.
+  
+  * **Performance** - These related variables are measurable academic assesments. It should be noted that participation rates are much greater on State Tests than the SHSAT which is a high stakes single exam. 'PCT_4S', 'PCT_4S_UNDRRP', 'PCT_4S_ECNDSV', 'ELA_PROF', 'MATH_PROF', 'SPHS_FEEDER', 'SPHS_OFFERS'.
+
+## Theoretical Constructs
+
+### Adverse Selection
+
+Concentrating SPHS admissions into a small number of feeder middle schools is a type of principal-agent problem where the agent (NYCDOE) has more information about school quality, student performance and academic options than the principals (the students).  When such information asymmetries occur, they can lead to a system failure resulting in a few students that benefit from best schools while the rest of the are left with lower-quality options.
+
+This outcome can be rectified by addressing the root of the assymetric information through publishing screens (student test scores, school evaluations) and signals (academic alternatives to specialized schools, test preparation policies).^[George A. Akerlof, 1970. "The Market for "Lemons": Quality Uncertainty and the Market Mechanism," The Quarterly Journal of Economics, Oxford University Press, vol. 84(3), pages 488-500.]
+
+### Rank Choice Matching
+
+All prospective high school freshmen rank up to 12 schools they would like to attend for which they have met the requirements.  A matching algorhithm then applies a minimization strategy to the students' selections that best match choices to actual outcomes. For unscreened high schools, only student preferences drive the algorithm, whereas in other schools, several factors determine admissions as described below.^[https://ibo.nyc.ny.us/iboreports/preferences-and-outcomes-a-look-at-new-york-citys-public-high-school-choice-process.pdf]
+
+* Audition - Programs demonstrating proficiency typically in performing arts/visual arts.
+* Educational Option - Programs designed for a normal distribution of students by State Test scores.
+* Limited Unscreened - Programs prioritizing demonstrated interest.
+* Screened - Programs ranking students based on grades, State Test scores and attendance.
+* Test - Programs ranking students using the Specialized High Schools Admissions test (SHSAT)
+* Unscreened - Programs that are ranked by student preference.
+* Zoned - Programs ranking students by geographic zoning.
+
+Research underlying this matching process shows that lottery systems based on school preference tend perform better on school tests and have reduced truancy rates.  This research suggests students who are offered their top choice have increased motivatation to perform well ^[Justine S. Hastings & Christopher A. Neilson & Seth D. Zimmerman, 2012. "The Effect of School Choice on Intrinsic Motivation and Academic Outcomes," NBER Working Papers 18324, National Bureau of Economic Research, Inc.].
+
+### Underrepresentation
+
+The NYCDOE high-stakes testing policy for SPHS has become a focal point of criticism in that it has resulted in a lack of diversity at these elite schools which are predominately Asian and White and increasingly admit a smaller proportions of Black and Hispanic students.^[Sean Patrick Corcoran & E. Christine Baker-Smith, 2018. "Pathways to an Elite Education: Application, Admission, and Matriculation to New York City's Specialized High Schools," Education Finance and Policy, MIT Press, vol. 13(2), pages 256-279, Spring.]
+
+### Alignment factors
+
+Alignment Theory as applied to SPHS admissions look at linkages between standards, curricula, assessments, and instruction to achieve desired academic goals. To acheive these goals teaching and learning activities require performance assessments that feedback their effectiveness.  ^[Biggs, John B.; Tang, Catherine Kim Chow (2011) Teaching for quality learning at university: what the student does. Maidenhead: McGraw-Hill. ISBN 9780335242757.] ^[Smith, Calvin (Novemeber 2008).  "Design-focused evaluation".  Assessment & Evaluation in Higher Education. 33 (6): 631–645. doi:10.1080/02602930701772762. S2CID 144731064.] ^[Resnick, L. B., Rothman, R., Slattery, J. B., & Vranek, J. L. (2003-2004). Benchmarking and Alignment of Standards and Testing. Educational Assessment, 9(1-2), 1–27. https://doi.org/10.1207/s15326977ea0901&2_1].
+
+### Information factors
+
+Applying Information Theory to the SPHS  is that learning--measured as subjective entropy (subjective uncertainty)--diminishes over time as students master the NYCDOE curriculum and this reflects in rising test scores  ^[E. Pfaffelhuber (1972) Learning and Information Theory, International Journal of Neuroscience, 3:2, 83-88, DOI: 10.3109/00207457209147016].
+
+### Motivational factors 
+
+Motivation is often cited as a driving factor in learning but interestingly, external rewards have been shown to be counterproductive to motivation particulary during early childhood development. Motivation is required to prepare for the SPHS entrance exam which pre-supposes middle schools support this initiative through the academic curriculum, communcation and test preparation. ^[Deci, E.L., Koestner, R. & Ryan, R.M. (1999). A meta-analytic review of experiments examining the effects of extrinsic rewards on intrinsic motivation. Psychological Bulletin, 125, 627-668.].
+
+### Symbolic factors
+
+Signaling the value of merit in academic achievment is important to encourage participation in the competition for SPHS offers.  Reflecting the diverse student population is also a primary value underlying the issue of SPHS underrepresentation and has been a major criticism of the current school choice process. 
+
+### Mapping Theory to Models
+
+The ‘Corresponding Variables’ listed above are meant to provide a mechanism for linking relevant theoretical strategies to predictor variables in corresponding models. While any predictive models we might choose to build would not be limited solely to the eight variables listed below, the intent is to choose the most representative indicators to model and provide explantion for SPHS outcomes.
+
+\begin{center}Table 1:  Theoretical Construct Mappings \end{center}
+
+| Theoretical Construct     | Source                    | Category               | Corresponding Variable
+|---------------------------|---------------------------|------------------------|----------------------------------------
+|Information Theory         |Supovitz                   |Performance             |SPHS_TESTERS, ELA_PROF, MATH_PROF, PCT_4S_UNDRRP
+|Alignment                  |Biggs, Smith               |All 5 Catagories        |SPHS_TESTERS, ELA_PROF, MATH_PROF, PCT_4S_UNDRRP
+|                           |                           |                        |PCT_WHITE, PCT_ELL
+|Motivational Theory        |Deci                       |Behavioral              |NONE
+|Symbolism                  |Supovitz                   |Demographic             |PCT_WHITE, PCT_ELL, PCT_4S_UNDRRP
+|Underrepresentation        |Corcoron, Baker-Smith      |Demographic             |PCT_BLACK, PCT_HISPANIC, PCT_WHITE, PCT_ASIAN, PCT_ELL
+|Ranked Choice Selection    |Kapor, Neilson & Zimmerman |Behavioral, Performance |SPHS_TESTERS, ELA_PROF, MATH_PROF, PCT_4S_UNDRRP
+|Adverse Selection          |Akerlof                    |Behavioral, Performance |SPHS_TESTERS, ELA_PROF, MATH_PROF, PCT_4S_UNDRRP
+
+## Methodology
+
+### Data Exploration
+
+This section explores the characteristics of each individual variable contained within the NYCDOE data set, including data types, range of valid values, distributions and correlations with one another.  In addition, variables with missing or invalid data values are investigated for imputation or removal.
+
+### Data Preparation
+
+This section develops strategies for handling missing or invalid data values and the separation of the master data set into dedicated "regression modeling “Training” and “Evaluation” subsets for regression modelling. Creation of separate training and evaluation data sets was in consideration of testing the regression models with unbiased SPHS admissions records.
+
+### Regression Modeling 
+
+This section identifies, develops, and tests regression models that represent the SPHS admissions process.  SPHS admissions are first predicted using a binary logistic distribution and then evaluated for effectiveness.  The “best” model was selected on the basis of performance metrics including AIC score, AUC, accuracy, classification error rates, precision, specificity, sensitivity, and F1 scores. In addition, predictions of the likely number of admissions implied application of a count regression model and such models were fitted (e.g., Poisson, Negative Binomial, zero-inflated) to the school data set. These models were compared on the basis of AIC scores, log likelihood and whether or not they produced realistic predictions. 
+
+### Model Selection
+
+For those schools with signficant SPHS acceptances, the selected count regression model was then used to predict the likely number of acceptances.  Two models were developed for each type of count model one with the *SPHS_OFFERS* response variables representing: high SHSAT scores; and high New York State test scores.  The later is more widely used and therefore more reflective of the NYCDOE student population.  Finally, the result of all regression models are summarized and their predictions evaluated against actual admissions data.
+
+## Findings
+
+The binomial logistic regression for (Model1) predicted with 95% accuracy all feeder middle schools that used the SHSAT as the entrance test and for (Model2) predicted with 92% accuracy all feeder middle schools using the NY State Test as the entrance test.
+
+Five count models were built to predict the number of SPHS offers per middle school.  Negative binomial models were chosen over Poisson models because the Poisson's had dispersion that varied signficantly from 1 indicating a poor fit. Zero-inflated negative binomial (ZINB) models were ultimately chosen after testing for skew, log-likelihood, chi-squared and p-values that indicate best fit.  The ZINB model for testing SHSAT offers still contains 18% zero-inflated data but its fit was still somewhat better then that of the ZINB model for testing NY State Test offers.
+
+NY State Test scores being more closely aligned to the NYCDOE curriculum and taken by more students then the SHSAT resulted in more SPHS acceptances with a more dispersed distribution among schools.  The salient point from this observation is that SPHS admissions based on the NY State Test addresses the selection bias criticism that qualified by Black and Hispanic students are underrepresented.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+read_file <- function(name, string = "s") {
+  read.csv(paste0(name, ".csv"), stringsAsFactors = FALSE, na.strings = string) %>%
+    rename_(.dots = setNames(names(.), 
+                             gsub("__", "", gsub(c("[[:punct:]]"), "_", tolower(names(.))))))
+}
+
+# (PASSNYC) School explorer
+school_expl <- read_file("~/IS628Fall2020/Project/2016 School Explorer", string = "N/A")
+
+# (NYC Open Data) Middle school directory
+ms_direct <- read_file("~/IS628Fall2020/Project/ms_directory_2018")
+
+# (NYC Open Data) Offers received by students in different middle schools
+offer_by_ms <- read_file("~/IS628Fall2020/Project/2017-2018_SHSAT_Admissions_Test_Offers_By_Sending_School")
+
+# (NYC Open Data) State test result
+read_test_result <- function(name, string) {
+  tbl <- read_file(name) %>%
+    filter(dbn %in% ms_direct$schooldbn,
+           grade == 8,
+           !is.na(mean_scale_score)) %>%
+    group_by(dbn) %>%
+    mutate(latest_year = max(year)) %>%
+    filter(year == latest_year) %>%
+    ungroup %>%
+    select(c(1, 7, 9, 11, 13, 15)) %>%
+    rename_at(vars(2:6), funs(paste0(., "_", string)))
+}
+
+math <- read_test_result("~/IS628Fall2020/Project/math", string = "math")
+ela <- read_test_result("~/IS628Fall2020/Project/ela", string = "ela")
+
+# (NYC Open Data) School district demo breakdown
+district_demo <- read_file("~/IS628Fall2020/Project/school-district-breakdowns")  
+
+# (NYC Open Data) Student composition
+demo_snapshot <- read_file("~/IS628Fall2020/Project/2013_-_2018_Demographic_Snapshot_School", string = "No Data")
+demo_snapshot <- demo_snapshot %>%
+  filter(year == "2017-18") %>%
+      inner_join(offer_by_ms, by = c('dbn' = 'feeder_school_dbn')) 
+
+# Create a table with demographic features
+diversity_tbl <-  offer_by_ms %>%
+  filter(count_of_offers != "0-5") %>%
+    mutate_at(vars(contains("count")), funs(as.numeric(.))) %>%
+      rename(schooldbn = feeder_school_dbn) %>%
+      select(-feeder_school_name) %>%
+        right_join(ms_direct %>%
+          transmute(district, schooldbn, school_name = printedschoolname)) %>%
+            left_join(demo_snapshot %>%
+              filter(year == "2017-18") %>%
+                transmute(
+                      schooldbn=dbn,percent_female=xfemale_1,percent_black=xblack_1,
+                      percent_hispanic=xhispanic_1,economic_need_index, by = "schooldbn"
+                    )
+                  ) %>%
+                    mutate(feeder_school = ifelse(!is.na(count_of_offers), TRUE, FALSE)) %>%
+                      mutate_at(vars(7:10), funs(as.numeric(gsub("%", "", .))/ 100)) %>%
+                        mutate(percent_black_hispanic = percent_black + percent_hispanic)
+
+offer_by_ms <- offer_by_ms%>% 
+  mutate(
+    #borough = substr(feeder_school_dbn, start = 3, stop = 3),
+    count_of_students_in_hs_admissions = as.numeric(count_of_students_in_hs_admissions),
+    count_of_testers = as.numeric(ifelse(count_of_testers == "0-5", "0", count_of_testers)),
+    count_of_offers = as.numeric(ifelse(count_of_offers == "0-5", "0", count_of_offers))
+  )
+
+# Append underrepresentation index score
+diversity_tbl <- diversity_tbl %>%
+  filter(!is.na(economic_need_index * percent_black_hispanic)) %>%
+  mutate(diversity_score = sqrt(economic_need_index^2 + percent_black_hispanic^2)) %>%
+  mutate(diversity_score = (diversity_score-min(diversity_score))/ (max(diversity_score)-min(diversity_score))) %>%
+  mutate(top_deciles = ifelse(diversity_score >= quantile(diversity_score, 0.75), 1, 2))
+
+# (NYC Open Data) Average class size
+class_size <- read_file("~/IS628Fall2020/Project/avg_class_size") %>%
+  filter(dbn %in% ms_direct$schooldbn,
+         grade_level == "MS Core") %>%
+  group_by(dbn) %>%
+  summarise(num_student = sum(number_of_students),
+            num_class = sum(number_of_classes)) %>%
+  transmute(dbn, avg_size = num_student/num_class)
+
+# (NYC Open Data) Pupil to teacher ratio
+ptr <- read_file("~/IS628Fall2020/Project/ptr") %>%
+  filter(dbn %in% ms_direct$schooldbn) %>%
+  select(-school_name)
+```
+
+\newpage 
+
+***
+
+# Part 1: Data Exploration
+
+## Data Summary
+
+The data set in this study focuses on the likelihood of whether New York City's Middle Schools are feeders to the Specialized High Schools and to accurately predict the number of students sent.  There are 591 rows of academic data, each representing geographic, economic, behavioral, demographic and performance attributes of a single NYCDOE middle school.  For each acceptance record there are 29 attributes that could potentially be used as predictor variables and two response variable: *SPHS_FEEDER* which indicates if the school has five or more SPHS offers; and *SPHS_OFFERS* which indicates the actual number of offers.
+
+Once the data set is complete, Generalized Linear Modelling (GLM) can be applied in a two-stage modeling approach. First model the response variable using a probability distribution, such as the binomial or Poisson distribution. Second, model the parameter of the distribution using a collection of predictors and a Logit form of multiple regression.  This exercise builds an appropriate model that classifies SPHS offers using a subset of the 29 attributes to predict SPHS offers using a Logit model for multiple linear regression.
+
+"The assumptions required for statistical tests in logistic regression are far less restrictive than those for Ordinary Least Squares regression. There is no formal requirement for multivariate normality, homoscedasticity, or linearity of the independent variables within each category of the dependent variable."   However, logistical regression models should have little or no multicollinearity.  That is that the independent variables should be independent from each other. ^[http://www.sagepub.com/upm-data/5081_Spicer_Chapter_5.pdf, page 135]
+
+## Compositional Analysis
+
+The NYCDOE administers the SHSAT to approximately 30% of eligible students each year which is roughly 25,000 eighth graders. However, offers are not distributed equally among students from different middle schools. In 2018 25% of SPHS offers went to the top 10 feeder middle schools and these offers skew heavily to Asian and White students ^[Sean Patrick Corcoran & E. Christine Baker-Smith, 2018. "Pathways to an Elite Education: Application, Admission, and Matriculation to New York City's Specialized High Schools," Education Finance and Policy, MIT Press, vol. 13(2), pages 256-279, Spring.].  The concentration of admissions is the crux of this paper, particularly the opportunities that exist for underrepresented high-achieving students.  Currently, acceptance to the SPHS schools is solely determined by the SHSAT, a single high-stakes test administered at the end of 7th grade and for which the subject matter being tested is not directly taught in the NYCDOE curricula.
+
+```{r, echo=FALSE, warning=FALSE}
+school_expl$school_income_estimate = as.numeric(gsub("[\\$,]", "", school_expl$school_income_estimate))
+school_expl$percent_ell = as.numeric(gsub("[\\%]", "", school_expl$percent_ell))
+school_expl$percent_asian = as.numeric(gsub("[\\%]", "", school_expl$percent_asian))
+school_expl$percent_black = as.numeric(gsub("[\\%]", "", school_expl$percent_black))
+school_expl$percent_hispanic = as.numeric(gsub("[\\%]", "", school_expl$percent_hispanic))
+school_expl$percent_white = as.numeric(gsub("[\\%]", "", school_expl$percent_white))
+school_expl$student_attendance_rate = as.numeric(gsub("[\\%]", "",school_expl$student_attendance_rate))
+school_expl$percent_of_students_chronically_absent= as.numeric(gsub("[\\%]", "",school_expl$percent_of_students_chronically_absent))
+school_expl$rigorous_instruction = as.numeric(gsub("[\\%]", "",school_expl$rigorous_instruction))
+school_expl$collaborative_teachers= as.numeric(gsub("[\\%]", "",school_expl$collaborative_teachers))
+school_expl$supportive_environment = as.numeric(gsub("[\\%]", "",school_expl$supportive_environment))
+school_expl$effective_school_leadership = as.numeric(gsub("[\\%]", "",school_expl$effective_school_leadership))
+school_expl$strong_family_community_ties = as.numeric(gsub("[\\%]", "",school_expl$strong_family_community_ties))
+school_expl$trust = as.numeric(gsub("[\\%]", "",school_expl$trust))
+
+school_expl1 <- school_expl %>% 
+  inner_join(offer_by_ms, by = c('location_code' = 'feeder_school_dbn')) %>%
+    select (4,5,6:10,12,16,17,18,19:27,29,31,33,35,37,40,41,122,123,125,126,131,132,133,135,136,141,163:165) %>%
+      left_join(class_size, by = c('location_code' = 'dbn')) %>%
+        left_join(ptr, by = c('location_code' = 'dbn')) %>%
+          left_join(demo_snapshot, by = c('location_code' = 'dbn')) %>%
+              transmute(
+                      DBN=location_code,
+                      SCHOOL_NAME=school_name.x,
+                      BOROUGH=substr(location_code, start = 3, stop = 3),
+                      DISTRICT=district,
+                      ADDRESS=addressfull_,
+                      ZIPCODE=zip,
+                      LATITUDE=latitude,
+                      LONGITUDE=longitude,
+                      COMMUNITY_SCHOOL=community_school_,
+                      ECONOMIC_NEED_INDX=economic_need_index.x * 100,
+                      INCOME=school_income_estimate,
+                      PCT_ELL=percent_ell,
+                      PCT_ASIAN=percent_asian,
+                      PCT_BLACK=percent_black,
+                      PCT_HISPANIC=percent_hispanic,
+                      PCT_WHITE=percent_white,
+                      PCT_ATTENDANCE=student_attendance_rate,
+                      PCT_ABSENCES=percent_of_students_chronically_absent,
+                      PCT_RIGOROUS=rigorous_instruction,
+                      PCT_COLLABORATIVE=collaborative_teachers,
+                      PCT_SUPPORTIVE=supportive_environment,
+                      PCT_EFFECTIVE=effective_school_leadership,
+                      PCT_FAMILY_TIES=strong_family_community_ties,
+                      PCT_TRUST=trust,
+                      PCT_4S=pmax(
+                          grade_7_ela_4s_all_students/grade_7_ela_all_students_tested,
+                          grade_7_math_4s_all_students/grade_7_math_all_students_tested 
+                      ) * 100,
+                      PCT_4S_UNDRRP =pmax(
+                          grade_7_ela_4s_black_or_african_american/grade_7_ela_all_students_tested,
+                          grade_7_math_4s_black_or_african_american/grade_7_math_all_students_tested
+                      ) * 100,                      
+                      PCT_4S_ECNDSV = pmax(
+                          grade_7_ela_4s_economically_disadvantaged/grade_7_ela_all_students_tested,
+                          grade_7_math_4s_economically_disadvantaged/grade_7_math_all_students_tested
+                      ) * 100,            
+                      SPHS_APPLICANTS=count_of_students_in_hs_admissions.y,
+                      ELA_PROF=average_ela_proficiency,
+                      MATH_PROF=average_math_proficiency,
+                      CLASS_SIZE=avg_size,
+                      PTRATIO=school_pupil_teacher_ratio,
+                      PCT_FEMALE=xfemale/(xmale + xfemale) * 100,
+                      SPHS_TESTERS=count_of_testers.x,
+                      SPHS_OFFERS=count_of_offers.x,
+                      SPHS_FEEDER=ifelse(count_of_offers.x == 0, 0, 1)
+            ) 
+
+school_expl1$ZIPCODE = as.numeric(school_expl1$ZIPCODE)
+# school_expl1$INCOME[is.na(school_expl1$INCOME)] <- 46242.25	
+# school_expl1$CLASS_SIZE = as.numeric(school_expl1$CLASS_SIZE)
+# school_expl1$CLASS_SIZE[is.na(school_expl1$CLASS_SIZE)] <- 24.01
+# school_expl1$PTRATIO = as.numeric(school_expl1$PTRATIO)
+# school_expl1$PTRATIO[is.na(school_expl1$PTRATIO)] <- 13.39
+school_expl1$SPHS_APPLICANTS = as.numeric(school_expl1$SPHS_APPLICANTS)
+school_expl1$SPHS_TESTERS = as.numeric(school_expl1$SPHS_TESTERS)
+school_expl1$SPHS_OFFERS = as.numeric(school_expl1$SPHS_OFFERS)
+```
+
+```{r, fig.width = 9, fig.height = 7, include = FALSE}
+# https://www.kaggle.com/joshuaha/passnyc-school-identification
+# url <- "https://raw.githubusercontent.com/jtopor/CUNY-MSDA-621/master/HW-4/621-HW4-XFORMED-DATA.csv"
+se1 <- school_expl1
+```
+
+```{r,eval=TRUE, include=FALSE}
+#convert factors and categorical data
+se1$DBN <- as.factor(se1$DBN)
+se1$BOROUGH <- as.factor(se1$BOROUGH)
+#se1$DISTRICT <- as.factor(se1$DISTRICT)
+#se1$ZIPCODE <- as.factor(se1$ZIPCODE)
+se1$COMMUNITY_SCHOOL <- as.factor(se1$COMMUNITY_SCHOOL)
+se0 <- se1
+```
+
+```{r, echo=FALSE, include=FALSE, warn.conflicts=FALSE}
+#attach(se1)
+```
+
+```{r,echo=FALSE, warn.conflicts=FALSE, include = FALSE}
+# subset rows where is not null
+se1 <- se1[!is.na(se1$PCT_4S), ]
+se1_1 <- se1
+se1_1 <- se1_1[which(se1_1$INCOME != 'NA' ),]
+se1_1 <- se1_1[,-c(1,2,3,5,9)]
+
+simod <- lm(data=se1_1, INCOME~.)
+summary(simod)
+
+simod1 <- lm(data=se1_1, INCOME~.-PCT_ELL)
+summary(simod1)
+
+simod1 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS)
+summary(simod1)
+
+simod2 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE)
+summary(simod2)
+
+simod3 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES)
+summary(simod3)
+
+simod4 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT)
+summary(simod4)
+
+simod5 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE)
+summary(simod5)
+
+simod6 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                         CLASS_SIZE)
+summary(simod6)
+
+simod7 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                         CLASS_SIZE-PCT_RIGOROUS)
+summary(simod7)
+
+simod8 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                         CLASS_SIZE-PCT_RIGOROUS-LATITUDE)
+summary(simod8)
+
+simod9 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                         CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST)
+summary(simod9)
+
+simod10 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                         CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP )
+summary(simod10)
+
+simod11 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                         CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE)
+summary(simod11)
+
+simod12 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF)
+summary(simod12)
+
+simod13 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF-
+                          PTRATIO)
+summary(simod13)
+
+simod14 <- lm(data=se1_1, INCOME~.-PCT_ELL-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF-
+                          PTRATIO-SPHS_TESTERS)
+summary(simod14)
+
+simod15 <- lm(data=se1_1, INCOME~.-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF-
+                          PTRATIO-SPHS_TESTERS-LONGITUDE)
+summary(simod15)
+
+simod16 <- lm(data=se1_1, INCOME~.-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF-
+                          PTRATIO-SPHS_TESTERS-LONGITUDE-PCT_ELL)
+summary(simod16)
+
+simod17 <- lm(data=se1_1, INCOME~.-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF-
+                          PTRATIO-SPHS_TESTERS-LONGITUDE-PCT_ELL-PCT_EFFECTIVE)
+summary(simod17)
+
+simod18 <- lm(data=se1_1, INCOME~.-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF-
+                          PTRATIO-SPHS_TESTERS-LONGITUDE-PCT_ELL-PCT_EFFECTIVE-PCT_ATTENDANCE)
+summary(simod18)
+
+simod19 <- lm(data=se1_1, INCOME~.-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF-
+                          PTRATIO-SPHS_TESTERS-LONGITUDE-PCT_ELL-PCT_EFFECTIVE-PCT_ATTENDANCE-SPHS_FEEDER)
+summary(simod19)
+
+simod20 <- lm(data=se1_1, INCOME~.-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF-
+                          PTRATIO-SPHS_TESTERS-LONGITUDE-PCT_ELL-PCT_EFFECTIVE-PCT_ATTENDANCE-SPHS_FEEDER-
+                          ELA_PROF)
+summary(simod20)
+
+simod21 <- lm(data=se1_1, INCOME~.-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF-
+                          PTRATIO-SPHS_TESTERS-LONGITUDE-PCT_ELL-PCT_EFFECTIVE-PCT_ATTENDANCE-SPHS_FEEDER-
+                          ELA_PROF-PCT_BLACK)
+summary(simod21)
+
+simod22 <- lm(data=se1_1, INCOME~.-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF-
+                          PTRATIO-SPHS_TESTERS-LONGITUDE-PCT_ELL-PCT_EFFECTIVE-PCT_ATTENDANCE-SPHS_FEEDER-
+                          ELA_PROF-PCT_BLACK-PCT_ASIAN)
+summary(simod22)
+
+simod23 <- lm(data=se1_1, INCOME~.-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF-
+                          PTRATIO-SPHS_TESTERS-LONGITUDE-PCT_ELL-PCT_EFFECTIVE-PCT_ATTENDANCE-SPHS_FEEDER-
+                          ELA_PROF-PCT_BLACK-PCT_ASIAN-PCT_WHITE)
+summary(simod23)
+
+simod24 <- lm(data=se1_1, INCOME~.-SPHS_APPLICANTS-PCT_SUPPORTIVE-PCT_ABSENCES-DISTRICT-ZIPCODE-
+                          CLASS_SIZE-PCT_RIGOROUS-LATITUDE-PCT_TRUST-PCT_4S_UNDRRP -PCT_COLLABORATIVE-MATH_PROF-
+                          PTRATIO-SPHS_TESTERS-LONGITUDE-PCT_ELL-PCT_EFFECTIVE-PCT_ATTENDANCE-SPHS_FEEDER-
+                          ELA_PROF-PCT_BLACK-PCT_ASIAN-PCT_WHITE-PCT_HISPANIC)
+summary(simod24)
+
+# check collinearity to ensure model validity
+vif(simod24)
+
+# function definition for impute function
+for(i in 1:nrow(se1))
+{
+  if(is.na(se1$INCOME[i]))
+  {
+    se1$INCOME[i] =  119605.03                             - 
+                                944.84 * se1$ECONOMIC_NEED_INDX[i] + 
+                                400.62 * se1$PCT_FAMILY_TIES[i] -
+                                407.29 * se1$PCT_4S[i] -
+                                770.58 * se1$PCT_FEMALE[i] +
+                                186.51 * se1$SPHS_OFFERS[i]
+    }
+}
+
+# subset rows where is not null
+se1_1 <- se1
+se1_1 <- se1_1[which(se1_1$CLASS_SIZE != 'NA' ),]
+se1_1 <- se1_1[,-c(1,2,3,5,9)]
+
+simod <- lm(data=se1_1, CLASS_SIZE~.)
+summary(simod)
+
+simod1 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS)
+summary(simod1)
+
+simod2 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE)
+summary(simod2)
+
+simod3 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME)
+summary(simod3)
+
+simod4 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS)
+summary(simod4)
+
+simod5 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE)
+summary(simod5)
+
+simod6 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES)
+summary(simod6)
+
+simod7 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                         PCT_4S)
+summary(simod7)
+
+simod8 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                         PCT_4S-SPHS_FEEDER)
+summary(simod8)
+
+simod9 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                         PCT_4S-SPHS_FEEDER-LONGITUDE)
+summary(simod9)
+
+simod10 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          PCT_4S-SPHS_FEEDER-LONGITUDE)
+summary(simod10)
+
+simod11 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          PCT_4S-SPHS_FEEDER-LONGITUDE-ECONOMIC_NEED_INDX)
+summary(simod11)
+
+simod12 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          PCT_4S-SPHS_FEEDER-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS)
+summary(simod12)
+
+simod13 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          PCT_4S-SPHS_FEEDER-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE)
+summary(simod13)
+
+simod14 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          PCT_4S-SPHS_FEEDER-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT)
+summary(simod14)
+
+simod15 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          PCT_4S-SPHS_FEEDER-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK)
+summary(simod15)
+
+simod16 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          PCT_4S-SPHS_FEEDER-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK-
+                          PCT_HISPANIC)
+summary(simod16)
+
+simod17 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          PCT_4S-SPHS_FEEDER-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK-
+                          PCT_HISPANIC-PCT_ELL)
+summary(simod17)
+
+simod18 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          PCT_4S-SPHS_FEEDER-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK-
+                          PCT_HISPANIC-PCT_ELL-PCT_TRUST)
+summary(simod18)
+
+simod19 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          PCT_4S-SPHS_FEEDER-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK-
+                          PCT_HISPANIC-PCT_ELL-PCT_TRUST-PCT_ASIAN)
+summary(simod19)
+
+simod20 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          PCT_4S-SPHS_FEEDER-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK-
+                          PCT_HISPANIC-PCT_ELL-PCT_TRUST-PCT_ASIAN-PCT_4S_UNDRRP )
+summary(simod20)
+
+simod21 <- lm(data=se1_1, CLASS_SIZE~.-PCT_RIGOROUS-ZIPCODE-INCOME-SPHS_TESTERS-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          PCT_4S-SPHS_FEEDER-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK-
+                          PCT_HISPANIC-PCT_ELL-PCT_TRUST-PCT_ASIAN-PCT_4S_UNDRRP -PTRATIO)
+summary(simod21)
+
+# check collinearity to ensure model validity
+vif(simod21)
+
+# function definition for impute function
+for(i in 1:nrow(se1))
+{
+  if(is.na(se1$CLASS_SIZE[i]))
+  {
+    se1$CLASS_SIZE[i] =     -266.70000000                   +
+                                 6.937000 * se1$LATITUDE[i] +
+                                 0.025740 * se1$PCT_WHITE[i] -
+                                 0.080970 * se1$PCT_ABSENCES[i] -
+                                 0.092470 * se1$PCT_COLLABORATIVE[i] +
+                                 0.068560 * se1$PCT_EFFECTIVE[i] +
+                                 0.008257 * se1$SPHS_APPLICANTS[i] +
+                                 5.081000 * se1$ELA_PROF[i] -
+                                 1.855000 * se1$MATH_PROF[i] +
+                                 0.055610 * se1$PCT_FEMALE[i]
+  }
+}
+
+#attach(se1)
+# subset rows where is not null
+se1_1 <- se1
+se1_1 <- se1_1[which(se1_1$PTRATIO != 'NA' ),]
+se1_1 <- se1_1[,-c(1,2,3,5,9)]
+
+simod <- lm(data=se1_1, PTRATIO~.)
+summary(simod)
+
+simod1 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER)
+summary(simod1)
+
+simod2 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS)
+summary(simod2)
+
+simod3 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME)
+summary(simod3)
+
+simod4 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE)
+summary(simod4)
+
+simod5 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE)
+summary(simod5)
+
+simod6 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES)
+summary(simod6)
+
+simod7 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                         SPHS_TESTERS)
+summary(simod7)
+
+simod8 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                         SPHS_TESTERS-PCT_4S)
+summary(simod8)
+
+simod9 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                         SPHS_TESTERS-PCT_4S-LONGITUDE)
+summary(simod9)
+
+simod10 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          SPHS_TESTERS-PCT_4S-LONGITUDE-ECONOMIC_NEED_INDX)
+summary(simod10)
+
+simod11 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          SPHS_TESTERS-PCT_4S-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS)
+summary(simod11)
+
+simod12 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          SPHS_TESTERS-PCT_4S-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE)
+summary(simod12)
+
+simod13 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          SPHS_TESTERS-PCT_4S-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT)
+summary(simod13)
+
+simod14 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          SPHS_TESTERS-PCT_4S-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK)
+summary(simod14)
+
+simod15 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          SPHS_TESTERS-PCT_4S-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK)
+summary(simod15)
+
+simod16 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          SPHS_TESTERS-PCT_4S-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK-
+                          PCT_HISPANIC)
+summary(simod16)
+
+simod17 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          SPHS_TESTERS-PCT_4S-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK-
+                          PCT_HISPANIC-PCT_ELL)
+summary(simod17)
+
+simod18 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          SPHS_TESTERS-PCT_4S-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK-
+                          PCT_HISPANIC-PCT_TRUST)
+summary(simod18)
+
+simod19 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          SPHS_TESTERS-PCT_4S-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK-
+                          PCT_HISPANIC-PCT_TRUST-PCT_ELL)
+summary(simod19)
+
+simod20 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          SPHS_TESTERS-PCT_4S-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK-
+                          PCT_HISPANIC-PCT_TRUST-PCT_ELL-PCT_ASIAN)
+summary(simod20)
+
+simod21 <- lm(data=se1_1, PTRATIO~.-SPHS_FEEDER-PCT_RIGOROUS-INCOME-ZIPCODE-PCT_SUPPORTIVE-PCT_FAMILY_TIES-
+                          SPHS_TESTERS-PCT_4S-LONGITUDE-ECONOMIC_NEED_INDX-SPHS_OFFERS-PCT_ATTENDANCE-DISTRICT-PCT_BLACK-
+                          PCT_HISPANIC-PCT_TRUST-PCT_ELL-PCT_ASIAN-PCT_4S_UNDRRP)
+summary(simod21)
+
+# check collinearity to ensure model validity
+vif(simod21)
+
+# ---------------------------------------
+# function definition for impute function
+for(i in 1:nrow(se1))
+{
+  if(is.na(se1$PTRATIO[i])|is.nan(se1$PTRATIO[i]))
+  {
+    se1$PTRATIO[i] =         104.000000                     -
+                                 2.5760   * se1$LATITUDE[i] -
+                               0.028970   * se1$PCT_WHITE[i] -
+                               0.011650   * se1$PCT_ABSENCES[i] +
+                               0.084540   * se1$PCT_COLLABORATIVE[i] -
+                               0.081110   * se1$PCT_EFFECTIVE[i] +
+                               0.002029   * se1$SPHS_APPLICANTS[i] +
+                               2.534000   * se1$ELA_PROF[i] +
+                               1.158000  * se1$MATH_PROF[i] +
+                               0.199300   * se1$CLASS_SIZE[i] -
+                               0.004557   * se1$PCT_FEMALE[i]
+  }
+}
+```
+
+\newpage
+
+## Missing Data
+
+There are 8 predictors in the data set that have missing values *PCT_4S*, *PCT_4S_UNDRRP*, *PCT_4S_ECNDSV*, *ELA_PREF*, *MATH_PREF*, *INCOME*, *PTRATIO* and *CLASS_SIZE*.  There were also 21 of 591 original rows that had multiple missing values that were not considered to contain outliers of significance and these rows were deleted rather than imputed.
+
+```{r,echo=FALSE,warning=FALSE, results = 'asis'}
+# Imputation & Data Removal
+DescriptiveStatistics <- se0[,c(11,25,26,27,29,30,31,32)]
+d0 <- dfSummary(DescriptiveStatistics, plain.ascii = FALSE, style = 'multiline', graph.magnif = 0.75, valid.col = FALSE, tmp.img.dir = "/tmp", headings = FALSE, caption="Imputation & Removal")
+
+d0 <- d0 %>%
+    select (Variable, `Stats / Values`, `Freqs (% of Valid)`, Missing) 
+d0$Variable <- d0$Variable
+d0$`Stats / Values` <- d0$`Stats / Values`
+d0$`Freqs (% of Valid)` <- d0$`Freqs (% of Valid)`
+d0$Missing <- d0$Missing 
+d0
+```
+
+The remaining 570 rows in the data set required imputation of missing data for *INCOME*, *PTRATIO*, *CLASS_SIZE*.  To do this, forward OLS models were built to predict the missing values using the remaining preditors in each row to impute them.  This final data set containing 570 complete rows is used as the baseline for modeling in part 3.  The rows that were removed and imputed data did not appear result in a loss of valid outliers that would change the models' predictive capability.
+
+\newpage
+
+##  Descriptive Statistics
+
+Data Type Analysis reveals that the predictors *DBN*, *DISTRICT*, *ZIP*, *COMMUNITY_SCHOOL* and *SPHS_FEEDER* are all either binary or categorical variables and have been transformed to factors variables.  Inclusion in the final dataset depends upon completeness of records as well as correlation with the response variables and non-collinearity with other predictors.  The *Descriptive Statistics* below are following imputation of missing data and removal of redundant variables.  
+
+Some of the remaining predictors such as *ECONOMIC NEED*, *PCT_ELL*, *PCT_ASIAN*, *PCT_BLACK*, *PCT_WHITE*, *PCT_4S*, *PCT_UNDERREPRESENTED_4S*, *SPHS_TESTERS*, *SPHS_OFFERS* show evidence of significant skew as indicated by the large differences between their mean and median values.
+
+Other predictors such as *PCT_ELL*, *PCT_ASIAN*, *PCT_WHITE*, *PCT_ATTENDANCE*, *PCT_RIGOROUS*, *PCT_COLLABORATIVE*, *PCT_SUPPORTIVE*, *PCT_EFFECTIVE*, *PCT_FAMILY_TIES*, *PCT_TRUST*, *PCT_ELA_4S*, *PCT_MATH_4S*, *SPHS_APPLICANTS*, *SPHS_TESTERS* and *SPSH_OFFERS* show evidence of potentially being problematic as evidenced by their large kurtosis and standard error values.  The analysis that follows explores these observations in more detail
+
+```{r,echo=FALSE,warning=FALSE, results = 'asis'}
+d1 <- describe(data.frame(se1[,-c(1,2,3,4,5,6,9)]))
+d1$mean <- round(d1$mean,0)
+d1$sd <- round(d1$sd,0)
+d1$min <- round(d1$min,0)
+d1$max <- round(d1$max,0)
+d1$range <- round(d1$range,0)
+d1$skew <- round(d1$skew,0)
+d1$kurtosis <- round(d1$kurtosis,0)
+d1 <- data.frame(d1)[,-c(1,6,7)] %>%
+  kable(caption = "SPHS Predictor Descriptive Statistics", booktabs=T, digits = 3) %>%
+  kable_styling(latex_options = c( "scale_down","HOLD_position"), font_size = 10)
+d1
+``` 
+
+Note that the NY State Test distributions for *PCT_ELA_4S* and *PCT_MATH_4S* are leftward skewed but not so highly skewed as when *SPSH_OFFERS* represents students passing the SHSAT per school. The overconcentraion of SHSAT testers and offers raises the prospect that NY State Test scores might offer a more balanced approach determining *SPSH_OFFERS*.  
+
+## Inferences from Theoretical Constructs
+
+### Ranked Choice Analysis
+
+Student high school options are based on a centralized school choice model that assigns students to high schools based on a variety of published factors.  For the SPHS schools the SHSAT test is the only factor.  In binary logit models, only the variable *SPHS_TESTERS* shows up as being a significant influence on whether a middle school is likely to feed SPHS admissions in both models.  
+
+Model 2 uses the NY State Test to determine SPHS offers because it is more widely offered and more aligned to NYCDOE curricula.  What is notable is that the signs in Model 2 are opposite those in Model 1.  What this says is that if the NY State Test determines SPHS admissions, high concentrations of testers in particular schools negatively correlate with SPHS acceptances.  This would be the case when high scorers are more uniformly distributed among schools.
+
+|   Model 1  | Variable                       |   Model 2  | Variable             
+|-----------:|-------------------------       |-----------:|-----------------------
+| -  30.5446 | Intercept                      | +  27.8199 | Intercept
+| +   2.9824 | log(SPHS_TESTERS + 1)          | -   3.5350 | log(SPHS_TESTERS + 1)
+| +   5.1919 | ELA_PROF                       | -   1.5259 | log(PCT_4S_UNDRRP + 1)
+| +   0.8371 | log(PCT_WHITE + 1)             | -   7.4528 | MATH_PROF
+| +   0.9603 | log(PCT_ELL + 1)               |            |
+
+Interpretation of Model 1 Coefficients . . . 
+
+  * *One percent increase in SPHS TESTERS is associated with a (2.9824 / 100) unit increase being an SPHS FEEDER school.*
+  
+  * *One percent increase in ELA PROFICIENCY is associated with a 5.1919 unit increase being an SPHS FEEDER school.* 
+  
+  * *One percent increase in PERCENT WHITE STUDENTS is associated with a (0.8371 / 100) unit increase being an SPHS FEEDER school.* 
+  
+  * *One percent increase in PERCENT ELL STUDENTS is associated with a (0.9603 / 100) unit increase being an SPHS FEEDER school.* 
+
+Interpretation of Model 2 Coefficients . . . 
+
+  * *One percent increase in SPHS TESTERS is associated with a (-3.5350 / 100) unit decrease being an SPHS FEEDER school.* 
+  
+  * *One percent increase in UNDERREPRESENTED W\ SCORES on NY STATE TEST is associated with a (-1.5259 / 100) unit decrease being an SPHS FEEDER school.* 
+  
+  * *One percent increase in MATH PROFICIENCY is associated with a -7.4528 unit decrease being an SPHS FEEDER school.* 
+
+### Adverse Selection Analysis
+
+The existance of significant zero-inflation requires special modelling consideration because a properly fitted count model would show a proportionate number of SPHS feeders.  Zero-inflation signifies an excessive number of non-SPHS feeder schools and the crowding-out many quality school--the so-called “middle school effect” that favors certain schools in the SPHS admissions process. ^[Sean Patrick Corcoran & E. Christine Baker-Smith, 2018. "Pathways to an Elite Education: Application, Admission, and Matriculation to New York City's Specialized High Schools," Education Finance and Policy, MIT Press, vol. 13(2), pgs. 256-279, Spring.]
+
+\newpage 
+
+### Alignment, Informational, Motivational & Symbolic Factors
+
+High stakes testing addresses a few goals of the NYCDOE.  It provides uniform measure of achievment based upon the stated academic standards.  It provides information about student achievment to teachers, administrators, parents and students and perhaps most importantly, it signifies what the city expects a well educated student to know.  The SHSAT is the traditional measure for SPHS acceptance is demographically unrepresentative of the student population.  The NY State Exams test a larger proportion of the student population are more aligned with NYCDOE curriculum and are taken by a more representative student population.
+
+```{r, echo = FALSE}    
+  ctable(ceiling(se1$ELA_PROF), se1$SPHS_FEEDER) %>% 
+      kable(caption = "Contingency NY State ELA Test Score Distribution", booktabs=T, digits = 3) %>%
+      kableExtra::kable_styling(latex_options = "hold_position")
+  
+  ctable(ceiling(se1$MATH_PROF - .2), se1$SPHS_FEEDER) %>% 
+      kable(caption = "Contingency NY State Math Test Score Distribution", booktabs=T, digits = 3) %>%
+      kableExtra::kable_styling(latex_options = "hold_position")
+```
+
+This alternate prediction model will be developed in the model building section that includes a more disperssed set of potential SPHS feeder schools, thus addressing both underrepresentation and preserving merit as existing NYDOE metrics for SPHS selection.  The alternate model still contains zero-inflated counts owing to the difficulty of acheiving 4s on the State Test but the exact policy threshold could be adjusted.  As can be seen from the following histogram comparisons, the alternate model results in a signficantly higher yield of __SPHS_FEEDER__ schools 189 (33.16%) vs. 117 (20.53%) in the base model.  During model selection, predictors derived from 4s on the State Test scores will be removed due to tautological considerations of deriving the response variable from the same data.  
+
+<!-- nrow(se1[se1$SPHS_FEEDER > 0, ]) (117/570) * 100 20.53% -->
+<!-- nrow(se2[se2$SPHS_FEEDER > 0, ]) (189/570) * 100 33.16% -->
+
+### SPHS OFFERS
+
+```{r, echo=FALSE, include = TRUE , fig.width = 7, fig.height = 1.5, fig.align="center", warning=FALSE}
+#####################################################################
+# Make small histograms for each variable
+par(mfrow = c(1,4), oma = c(1, 1, 0, 0), mar=c(1, 1, 0, 1) + 1 )
+# populate response variables for 2nd model based on State Test and not SHSAT scores
+se2  <- se1 %>%
+ select(everything()) %>%
+ mutate(
+  SPHS_OFFERS = round(SPHS_TESTERS * PCT_4S/100),
+  SPHS_FEEDER = ifelse( round(SPHS_TESTERS * PCT_4S/100), 0 , 1)
+)
+
+# save off static datasets for reference from github.
+# ------------------------------------------------------------------------
+# write.csv(se0 , file = "/Users/scottkarr/IS628Fall2020/Project/se0.csv", row.names = FALSE)
+# write.csv(se1 , file = "/Users/scottkarr/IS628Fall2020/Project/se1.csv", row.names = FALSE)
+# write.csv(se2 , file = "/Users/scottkarr/IS628Fall2020/Project/se2.csv", row.names = FALSE)
+
+url1 <- "https://raw.githubusercontent.com/scottkarr/IS628/main/se0.csv"
+se0 <- suppressWarnings(read.csv(url1, stringsAsFactors = FALSE))
+
+url2 <- "https://raw.githubusercontent.com/scottkarr/IS628/main/se1.csv"
+se1 <- suppressWarnings(read.csv(url2, stringsAsFactors = FALSE))
+
+url3 <- "https://raw.githubusercontent.com/scottkarr/IS628/main/se2.csv"
+se2 <- suppressWarnings(read.csv(url3, stringsAsFactors = FALSE))
+# ------------------------------------------------------------------------
+
+hist(se1$SPHS_OFFERS,              main="Model 1: SHSAT",xlab="All Schools",ylab="Frequency",breaks=35,col="yellow",cex.main=.75)
+hist(which(se1$SPHS_OFFERS != 0 ), main="Offers per SHSAT",xlab="Feeder Schools",ylab="Frequency",breaks=35,col="yellow",cex.main=.75)
+hist(se2$SPHS_OFFERS,              main="Model 2: State Tests",xlab="All Schools",ylab="Frequency",breaks=35,col="yellow",cex.main=.75)
+hist(which(se2$SPHS_OFFERS != 0 ), main="Offers per NY State Test",xlab="Feeder Schools",ylab="Frequency",breaks=35,col="yellow",cex.main=.75)
+```
+
+\newpage
+
+### Underrepresentation 
+
+This is the key demographic predictor of SPHS offers and as such warrants special consideration.  The top 25% schools with the highest Underrepresentation represent 20 out of 32 school dbns in New York City.  Later analysis will show alternatives to the SHSAT and other mitigating factors that may well change the dynamic of this underrepresented population.
+
+To examine whether the most successful feeder middle school are compositionally different from other schools, the following density plot was developed to illustrate *Underrepresentation* specifically of Black & Hispanic SPHS students using the concentration of ethnic makeup per school and the school's Economic Need Index ^[Sean Patrick Corcoran & E. Christine Baker-Smith, 2018. "Pathways to an Elite Education: Application, Admission, and Matriculation to New York City's Specialized High Schools," Education Finance and Policy, MIT Press, vol. 13(2), pages 256-279, Spring.] ^[https://www.kaggle.com/laiyipeng/target-schools-action-recommended-for-passnyc] ^[(calculated as % temp housing + % HRA eligible * 0.5 + % free lunch eligible * 0.5)]. 
+
+```{r, echo=FALSE, fig.width = 5, fig.height = 3.5, fig.align="center", warning=FALSE}
+# Scatterplot for % Black and Hispanic Students and Economic Need Index
+ggplot(data = diversity_tbl %>% 
+         mutate(count_of_offers = ifelse(is.na(count_of_offers), 0, count_of_offers)), 
+       aes(x = percent_black_hispanic, y = economic_need_index)) +
+  geom_point(aes(color = feeder_school, size = count_of_offers), alpha = 0.7) +
+  scale_color_manual(values = c("#606060","yellow"),
+                     labels = c("0-5 Offers","GT 5 Offers")) +
+  geom_smooth(method = "lm", color = "black", size = 0.5) +
+  xlab("Increasing % of Black & Hispanic Students") +
+  ylab("Increasing Economic Need") +
+  ggtitle(label = "Underrepresention of Black & Hispanic Students by SPHS Offers",
+          subtitle = "Note: Sizes Indicates 2018 Offers based on SHSAT") +
+  guides(fill = FALSE, alpha = FALSE, size = FALSE,
+         color = guide_legend(nrow = 1)) +
+  theme(axis.title = element_text(size = 8),
+        legend.position = "top",
+        legend.text = element_text(size = 8),
+        legend.title = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_rect(color = "white", fill = "white"),
+        panel.grid.major = element_line(color = "#EFEFEF"),
+        plot.title = element_text(hjust = 0.5, size = 10, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 9))
+```
+
+```{r, echo=FALSE, fig.width = 7, fig.height = 2.5, fig.align="center", warning=FALSE, message=FALSE}
+district_demo %>%
+  transmute(district = row_number(jurisdiction_name),
+            perc_black_hispanic = percent_hispanic_latino + percent_black_non_hispanic,
+            perc_public_assist = percent_receives_public_assistance) %>%
+  left_join(diversity_tbl %>%
+              group_by(district) %>%
+              summarise(total_count = n_distinct(schooldbn),
+                        avg_score = mean(diversity_score, na.rm = TRUE)), by = "district")  %>%
+  left_join(diversity_tbl %>%
+              filter(top_deciles == 1) %>%
+              group_by(district) %>%
+              summarise(under_count = n_distinct(schooldbn)), by = "district") %>%
+  ggplot(aes(x = district)) +
+  geom_bar(aes(y = total_count, fill = "gray"), alpha = 0.8, stat = "identity") +
+  geom_bar(aes(y = under_count, fill = "yellow"), color="black", alpha = 0.8, stat = "identity") +
+  scale_fill_manual(values = c("gray", "yellow"),
+                    labels = c("Other Schools", "Top 25% Underrepresented Schools"),
+                    guide = guide_legend(reverse=FALSE)) +
+  xlab("School Districts of New York City") +
+  ylab("Number of Schools") +
+  ggtitle("SPHS Underrepresentation of Schools per District") +
+  scale_y_continuous(sec.axis = sec_axis(~./10, name = "SPHS Underrepresention")) +
+  theme(axis.title = element_text(size = 8),
+        panel.border = element_blank(),
+        panel.background = element_rect(color = "white", fill = "white"),
+        panel.grid.major = element_line(color = "#EFEFEF"),
+        plot.title = element_text(hjust = 0.5, size = 10, face = "bold"),
+        legend.title = element_blank(),
+        legend.position = "top",
+        legend.text = element_text(size = 8)
+  )
+```
+
+\newpage
+
+### Evaluating Catagorical Relationship
+Prior to developing a multivariate model it is useful to analyze individual relationships between each predictor and the response variable and to evaluate the magnitude and direction of their relationship. 
+
+* **Boxplots** evaluating Predictor variables relative to the binary response variable s one way in which we can begin to gain insight into the predictive of each variable to the response variable.
+
+* **Bargraphs** evaluating Predictor variables relative to the catagorical response variable are similar but more dispursed distribution showing the relative performance each catagory to the response variable.
+
+* **Lineplots** evaluating predictor variables to the a continuous response variable can provide trendline insights of their relationship. 
+
+| Catagorical Relationships |
+|:-------------------------:|
+
+```{r, echo=FALSE, include=FALSE, warn.conflicts=FALSE}
+attach(se1)
+```
+
+```{r, fig.width = 9, fig.height = 7, echo = FALSE}
+#####################################################################
+# Make small histograms for each variable
+par(mfrow = c(6,5), oma = c(1, 1, 0, 0), mar=c(1, 3, 0, 1) + 1 )
+
+# ------------------------------------------------------------------------
+# CATEGORICAL: BOROUGH
+
+# how many BOROUGH for each category?
+
+s.BOROUGH.M <- sum(BOROUGH == 'M')
+# there are 121 schools in Manhattan
+
+s.BOROUGH.K <- sum(BOROUGH == 'K')
+# there are 183 in Brooklyn
+
+s.BOROUGH.Q <- sum(BOROUGH == 'Q')
+# there are 110 Queens
+
+s.BOROUGH.X <- sum(BOROUGH == 'X')
+# there are 139 Bronx
+
+s.BOROUGH.R <- sum(BOROUGH == 'R')
+# there are 17 Staten Island
+
+# now get counts of offers for each category
+BOROUGH.M.TPOS <- nrow(subset(se1, BOROUGH == 'M' & SPHS_FEEDER == 1))
+BOROUGH.K.TPOS <- nrow(subset(se1, BOROUGH == 'K' & SPHS_FEEDER == 1))
+BOROUGH.Q.TPOS <- nrow(subset(se1, BOROUGH == 'Q' & SPHS_FEEDER == 1))
+BOROUGH.X.TPOS <- nrow(subset(se1, BOROUGH == 'X' & SPHS_FEEDER == 1))
+BOROUGH.R.TPOS <- nrow(subset(se1, BOROUGH == 'R' & SPHS_FEEDER == 1))
+
+# get ratios for each category
+BOROUGH.M.InAcc <- BOROUGH.M.TPOS / s.BOROUGH.M
+BOROUGH.K.InAcc <- BOROUGH.K.TPOS / s.BOROUGH.K
+BOROUGH.Q.InAcc <- BOROUGH.Q.TPOS / s.BOROUGH.Q
+BOROUGH.X.InAcc <- BOROUGH.X.TPOS / s.BOROUGH.X
+BOROUGH.R.InAcc <- BOROUGH.R.TPOS / s.BOROUGH.R
+
+rel_percs <- c(BOROUGH.M.InAcc, BOROUGH.K.InAcc, BOROUGH.Q.InAcc, BOROUGH.X.InAcc, BOROUGH.R.InAcc)
+
+mp <- barplot(rel_percs, names.arg = c('M', 'K', 'Q', 'X', 'R'),
+          main = ('BOROUGH'), ylim = c(0, 1), col = 'yellow', ylab="SPHS Offers",
+          xlim=c(0,6),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75, cex.names=.75, las=2)
+
+# write the percentage values above the individual bars in the plot
+text(mp, rel_percs, labels = format(round(rel_percs, 3), 4),
+     pos = 3, cex = .6)
+
+boxplot(DISTRICT~SPHS_FEEDER, ylab="District", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(ZIPCODE~SPHS_FEEDER, ylab="Zipcode", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(ECONOMIC_NEED_INDX~SPHS_FEEDER, ylab="% Economic Need", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(INCOME~SPHS_FEEDER, ylab="School Income", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_ELL~SPHS_FEEDER, ylab="%  ELL", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_ASIAN~SPHS_FEEDER, ylab="% Asian", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_BLACK~SPHS_FEEDER, ylab="% Black", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_HISPANIC~SPHS_FEEDER, ylab="% Hispanic", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_WHITE~SPHS_FEEDER, ylab="% White", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_ATTENDANCE~SPHS_FEEDER, ylab="% Attendance", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_ABSENCES~SPHS_FEEDER, ylab="% Absences", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_RIGOROUS~SPHS_FEEDER, ylab="% Rigorous", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_COLLABORATIVE~SPHS_FEEDER, ylab="% Collaborative", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_SUPPORTIVE~SPHS_FEEDER, ylab="% Supportive", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_EFFECTIVE~SPHS_FEEDER, ylab="% Effective", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_FAMILY_TIES~SPHS_FEEDER, ylab="% Family Ties", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_TRUST~SPHS_FEEDER, ylab="% Trust", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_4S~SPHS_FEEDER, ylab="% PCT_4S", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_4S_UNDRRP ~SPHS_FEEDER, ylab="% Underrepresented with PCT_4S", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_4S_ECNDSV~SPHS_FEEDER, ylab="%4s and Econ Disadvantaged", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(SPHS_APPLICANTS~SPHS_FEEDER, ylab="SPHS Applicants", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(ELA_PROF~SPHS_FEEDER, ylab="Avg ELA Proficiency", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(MATH_PROF~SPHS_FEEDER, ylab="Avg Math Proficiency", 
+        main="Is Feeder ? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(CLASS_SIZE~SPHS_FEEDER, ylab="Class Size", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PTRATIO~SPHS_FEEDER, ylab="Pupil-Teacher ratio", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(PCT_FEMALE~SPHS_FEEDER, ylab="% Female", 
+        main="Is Feeder? (1:Y,0:N): % Female", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+boxplot(SPHS_TESTERS~SPHS_FEEDER, ylab="% Took the SHSAT", 
+        main="Is Feeder? (1:Y,0:N)", col="yellow",
+        xlim=c(0,3),  width=c(1,1), cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+
+plot(SPHS_OFFERS, ELA_PROF, ylab="ELA Score", 
+        main="SPHS_Offers", col="yellow",
+        cex.main=.75, cex.lab=.75, cex.axis=0.75 ) 
+lines(lowess(SPHS_OFFERS, ELA_PROF), col="red")
+
+plot(SPHS_OFFERS, MATH_PROF, ylab="Math Score", 
+        main="SPHS Offers", col="yellow", 
+        cex.main=.75, cex.lab=.75, cex.axis=0.75 )
+lines(lowess(SPHS_OFFERS, MATH_PROF), col="red")
+```
+
+\newpage
+
+**Response Variables** *SPHS_FEEDER* is the binary catagorical response variable evaluated for each predictor as illustrated in the table above.  Observations of of significance follow.
+
+  - __SPHS_FEEDER__ = 0: school does not send 5 or more students to an SPHS school.
+  - __SPHS_FEEDER__ = 1: school successfully sends 5 or more students to an SPHS school.
+  - __SPHS_OFFERS__ = #: school's count of successful SPHS offers.
+
+**By Geography:** *BOROUGH*, *DISTRICT*, *ZIPCODE*, *LONGITUDE* and *LATITUDE* are not `ranked` catagorical predictors, so while range differences are meaningful for schools that have SPHS offers, median differences are not.
+
+  - 5 *BOROUGH's* ordered by increasing % of schools with *SPHS_OFFERS*:  the Bronx (5% of 139), Brooklyn (18.6% of 183), Manhattan (19.8% of 121), Queens (39.1% of 110) and Staten Island (52.9% of 17).
+
+  - 32 *DISTRICT's* show the 25% most underrepresented schools by SPHS OFFERS are concentrated in 20 of DOE's 32 *DISTRICT's*. The Inter Quartile Range (IQR) of offers is nearly the same for SPHS feeder and non-feeder schools so roughly an equal amount of schools per district are SPHS feeders although some districts send far fewer students per school. 	
+
+  - 146 *ZIPCODE's* have schools with *SPHS_TESTERS*.  Note though distribution skews toward the low end of the range between 0 and 207 offers with a median of 7 and a mean of 27.32.  *ZIPCODE's* sending more than 50 students may be considered outliers.
+
+**By Economics:** *ECONOMIC_NEED_INDX*, *INCOME* are numeric predictors under consideration.  
+
+  - *ECONOMIC_NEED_INDX* has a higher median (75) and IQR (70-80) for non feeder schools than median (45) and IQR (30-60).  We can deduce unsurprisingly that schools with high economic need are far more likely to not to be feeder schools.
+
+  - *INCOME* has a lower median ($40,000) and IQR ($30-$50,000) for non feeder schools than median ($60,000) and IQR ($50-$80,000).  We can deduce unsurprisingly that schools with high economic need are far more likely to not to be feeder schools.
+
+**By Behavioral:** *PCT_ATTENDANCE*, *PCT_TRUST*, *PCT_EFFECTIVE*, *PCT_SUPPORTIVE*, *PCT_RIGOROUS*, *PCT_COLLABORATIVE*, *PCT_FAMILY_TIES*, *PTRATIO*, *CLASS_SIZE* are numeric predictors based on survey response none of which show much difference in their descriptive statistics when comparing SPHS feeder and non-feeder schools. 
+  
+  - *CLASS_SIZE* & *PTRATIO* (Pupil Teacher ratio) are averages per school and surprisingly slightly higher for SPHS feeder schools than for non-feeder schools.  Perhaps this has something to do with high demand and crowding in the feeder schools
+
+  - *PCT_ABSENCES* has a higher median (20) and IQR (15-30) for non feeder schools than median (10) and IQR (5-15).  We can deduce unsurprisingly that schools with high absenteeism are far more likely to not to be feeder schools.
+
+**By Demographic:** Ethnic, Gender and Language breakdown per school  *PCT_ELL*, *PCT_FEMALE* are numeric predictors based on survey response none of which show much difference in their descriptive statistics when comparing SPHS feeder and non-feeder schools.  Only racial predictors show in this catagory show signficant differences between SPHS feeder and non-feeder schools.
+
+  - *PCT_BLACK* has a higher median (20) and IQR (20-70) for non feeder schools than median (10) and IQR (5-15).  We can deduce that schools with higher *PCT_BLACK* population are far more likely to not to be feeder schools.  This population is signficantly represented in the underserved population and is therefore a focus of alternate paths in applying and gaining admittance.
+  
+  - *PCT_HISPANIC* has a higher median (20) and IQR (20-70) for non feeder schools than median (10) and IQR (10-30).  We can deduce that schools with higher *PCT_HISPANIC* population are far more likely to not to be feeder schools.  This population is signficantly represented in the underserved population and is therefore a focus of alternate paths in applying and gaining admittance.
+
+  - *PCT_WHITE* has a higher median (20) and IQR (5-10) for non feeder schools than median (10) and IQR (15-40).  We can deduce that schools with higher % White population are far more likely to be feeder schools. 
+
+  - *PCT_ASIAN* has a higher median (20) and IQR (5-10) for non feeder schools than median (10) and IQR (15-45).  We can deduce that schools with higher % Asian population are far more likely to be feeder schools. 
+   
+  - *SPHS_APPLICANTS* & *SPHS_TESTERS* not surprisingly, schools with more SPHS applications and test takers have much more likely to be feeder schools.
+
+**By Performance:** *PCT_4S*, *PCT_4S_UNDRRP*, *PCT_4S_ECNDSV*, *ELA_PROF*, *MATH_PROF*, *PTRATIO*, *CLASS_SIZE*, *SPHS_APPLICANTS*, *SPHS_TESTERS* 
+
+  - *PCT_4S* or student's scoring 4's on the New York State Test, have a lower median (10) and IQR (5-10) for non feeder schools than median (25) and IQR (20-40).  We can deduce that high State Test scores correlate to being an SPHS feeder schools.  Since significantly more students take the state test then the SHSAT, this may well be the basis for getting to a representative pool of applicants. Both tests Math and English proficiency but the State Tests subject matter is more closely aligned with NYCDOE Regents standards and curricula.
+  
+  - *PCT_4S_UNDRRP* or schools with underrepresented students that score 4's on the New York State Test showed little difference between those in feeder schools and those that are not.  This further underscores the notion that there are schools with high acheiving students that are not SPHS feeder schools.  The respresentation of this group may very well improve if the State Tests were to be used as the SPHS enrollment criteria.
+  
+  - *PCT_4S_ECNDSV* are similar to *PCT_4S*
+  
+  - *ELA_PROF* & *MATH_PROF* the average ELA and Math scores for SPHS feeder scores are ~3 and for non SPHS feeder schools ~2.4.
+  
+\newpage
+
+### Evaluating Skew and Clustering
+  
+**Distributions** of variables show the existance of signficant skew for **Economic**, **Demographic** and **Performance** catagories of predictors as well as the **Response** variables. Some skewed predictors are be dominated by high concentration around specific values. For example all **Behavioral** predictors are zero-inflated because their data is survey driven and zeroes likely indicate non-responsiveness. 
+
+* **Histograms** evaluating predictor variables population density indicates anomolies such as skew, kurtosis and clustering of numeric variables.
+
+| Population Density Distributions |
+|:--------------------------------:|
+
+```{r, fig.width = 7, fig.height = 5, echo=FALSE, message = FALSE, warning = FALSE}
+par(mfrow = c(5,5), oma = c(1, 1, 0, 0), mar=c(1, 3, 0, 1) + 1 )
+
+# Make small histograms for each variable
+df <- se1[sapply(se1, is.numeric)]
+df2 <- se2[sapply(se2, is.numeric)]
+#colnames(df)
+hist(df$ZIPCODE,main="ZIPCODE",  breaks=10000,col="yellow",cex.main=.75)
+hist(df$DISTRICT,main="DISTRICT",  breaks=20,col="yellow",cex.main=.75)
+hist(df$LATITUDE, main="LATITUDE",  breaks=20,col="yellow",cex.main=.75)
+hist(df$LONGITUDE, main="LONGITUDE",  breaks=20,col="yellow",cex.main=.75)
+hist(df$ECONOMIC_NEED_INDX, main="ECONOMIC NEED",  breaks=20,col="yellow",cex.main=.75)
+hist(df$INCOME, main="SCHOOL INCOME",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_FEMALE, main="PCT FEMALE",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_ATTENDANCE, main="PCT ATTENDANCE",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_ABSENCES, main="PCT ABSENCES",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_ELL, main="PCT ELL",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_ASIAN, main="PCT ASIAN",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_BLACK, main="PCT BLACK",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_HISPANIC, main="PCT HISPANIC",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_WHITE, main="PCT WHITE",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_RIGOROUS, main="PCT RIGOROUS",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_COLLABORATIVE, main="PCT COLLABORATIVE",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_SUPPORTIVE, main="PCT SUPPORTIVE",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_EFFECTIVE, main="PCT EFFECTIVE",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_FAMILY_TIES, main="PCT FAMILY TIES",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_TRUST, main="PCT TRUST",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_4S, main="PCT PCT_4S",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_4S_UNDRRP , main="PCT UNDERREPRESENTED W/ 4S",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PCT_4S_ECNDSV, main="PCT ECON DISADV PCT_4S",  breaks=20,col="yellow",cex.main=.75)
+hist(df$ELA_PROF, main="AVG ELA PROF",  breaks=20,col="yellow",cex.main=.75)
+hist(df$MATH_PROF, main="AVG MATH PROF",  breaks=20,col="yellow",cex.main=.75)
+hist(df$CLASS_SIZE, main="AVG CLASS SIZE",  breaks=20,col="yellow",cex.main=.75)
+hist(df$PTR, main="PUPIL TEACHER RATIO",  breaks=20,col="yellow",cex.main=.75)
+hist(df$SPHS_APPLICANTS, main="SPHS APPLICANTS",  breaks=20,col="yellow",cex.main=.75)
+hist(df$SPHS_TESTERS, main="SPHS TESTERS",  breaks=20,col="yellow",cex.main=.75)
+hist(df$SPHS_OFFERS, main="SPHS OFFERS",  breaks=20,col="yellow",cex.main=.75)
+#hist(df$SPHS_FEEDER, main="SPHS FEEDER",  breaks=20,col="yellow",cex.main=.75)
+```
+
+**Skew** by racial composition or English Language Learners illustrates true variance in the NYCDOE's composition and therefore should not be altered.  Much of the skew in **Performance** predictors is explainable by observing that only a fraction of the NYC school population scores 4 on the NY State exams or passes the SHSAT.  **Economic** predictors skew is similarly explainable by schools' variance in economic need.  The concentration of a few feeder middle schools that disproportionatly account for SPHS offers correlates with economic and demographic factors.  Finally, the catagorical variable *COMMUNITY_SCHOOL* contains very little data variation and appeared to add little value for modeling and was therefore removed.
+
+### Variable Anomolies
+Understanding the nature of high frequencies concentrations and skew for specific predictor variables should not be assumed to be an anomoly that needs to be fixed.  High frequency data concentrations cannot easily be transformed without information loss. For example zero-inflated ethnic data may indicate the school actually has no representation for a particular ethnic group or that the groups data went unreported. As such, transformation of such values during data preparation must only be attempted after careful consideration of the consequences.  
+
+* **Concentration** of six demographic variables *PCT_ELL*, *PCT_ASIAN*, *PCT_BLACK*, *PCT_HISPANIC*, *PCT_WHITE*, *PCT_ASIAN*, are  zero-inflated to a degree reflecting varying proportions of representation by race, ethnicity, gender and English language proficiency.  The distributions represent the diverse mix of schools and should not be transformed as this risks data loss and dilutes their predictive value.  The last variable, *COMMUNITY_SCHOOL* contains binary categorical data which has little variance and was eliminated as it was of little use in modeling the likelihood of an SPHS offer.
+
+In addition, performance variables *PCT_4S*, *PCT_UNDERREPRESENTED_PCT_4S*, *CLASS SIZE*, *PTRATIO*, *SPHS_TESTERS*, and *SPHS_OFFERS* all exhibit a concentration of values at zero that significantly skew their distributions. This zero inflation is indicative of a significant percentage of students that opt out of the SPHS test influenced by geographic proximity to these schools and preparation resources for the SHSAT provided by many underserved schools.
+
+* **Skew** in Geographic predictors *BOROUGH*, *ZIPCODE* and *DISTRICT* are politically determined and have implications economically and in the SPHS representation.  These boundaries should not be transformed as they were deliberately chosen and have direct correlation as they are to SPHS representation. 
+
+* **Imputation** of data was considered for eight variables with missing values *INCOME* 381 rows (64.47%), *PCT_4S* 21 rows (3.55%), *PCT_4S_UNDRRP* rows 21 (3.55%), *PCT_4S_ECNDSV* rows 21 (3.55%), *ELA_PROF* 6 rows (1.02%), *MATH_PROF* rows 6 (1.02%), *CLASS_SIZE* rows 113 (19.12%) and *PTRATIO* 112 rows (18.95%).  Examination the 21 rows with missing data for **Performance** predictors suggests either making multiple imputations or to remove the rows.  These rows do not appear to contain critical outliers that would siginficantly diminish modelling.  Removing these 21 rows also has the added benefit of limiting the remaining imputations to *INCOME* 361 rows (63.33%), *CLASS_SIZE* rows 92 (16.14%) and *PTRATIO* 92 rows (16.14%).
+
+## Correlation Matrix
+Directionality of each predictor against the response variable *SPHS_OFFERS* is provided in the table below. As can be seen, variables showing unusually strong corrleation values are from **Demographics** and **Performance** catagories.  It is not suprising to find that *SPHS_TESTERS* has the highest colinearity with *SPHS_OFFERS* since students self-select to take the SHSAT and passing is the only requirement for an offer.  Variables exhibiting lower or negative correlations with the response variable are **Behavioral**, **Geographic** and **Economic** categories but are still of value as modelling factors.
+
+It is notable that the **Performance** predictors *ELA*_PROF, *MATH_PROF*, *PCT_4S* AND *PCT_4S_ECNDSV* are correlated strongly to *SPHS_OFFERS* which suggests NY State tests as a good candidate to replace the SHSAT.  The NY State tests have two principal advantages over the SHSAT, they have near universal participation and they are an annual evaluation starting in grade 3.  The implication is that they are more representative of the NYCDOE's student population but still measure academic merit.  In fact the NY State tests may evaluate merit to a higher degree because they are part of schools' curricula.
+
+Ranking relative correlations can be used during model building for selecting significant predictors based on correlation to the response variable while removing variables exhibiting signficant collinearity among the predictors.
+
+```{r, fig.width = 5, fig.height = 4, echo=FALSE, message = FALSE, warning = FALSE, floating = FALSE}
+c1 <- cor(df)
+c1 <- c1[order(c1[,31],decreasing=TRUE),]
+c1 <- data.frame(c1[-c(3,4),]) %>% 
+        select(SPHS_FEEDER) 
+# c1 <- kable(c1,caption = "Correlation against Response Variable", booktabs=T, digits = 3) %>%
+#         kable_styling( font_size = 6)
+
+c2 <- cor(df2)
+c2 <- c2[order(c2[,31],decreasing=TRUE),]
+c2 <- data.frame(c2[-c(3,4),]) %>% 
+        select(SPHS_FEEDER)
+# c2 <- kable(c2,caption = "Correlation against Response Variable", booktabs=T, digits = 3) %>%
+#         kable_styling( font_size = 6)
+
+colnames(c1) <- c("SPHS_FEEDER_M1")
+colnames(c2) <- c("SPHS_FEEDER_M2")
+c3 <- cbind(c1,c2)
+c3 <- c3[-c(1),]
+c3 <- kable(c3,caption = "Correlation against Response Variable", booktabs=T, digits = 3) %>%
+         kable_styling( font_size = 8,latex_options = "HOLD_position")
+c3
+
+# also remove PCT_4S from se2 data sets due to collinearity with response variable
+se2 <- se2[,-c(25)]
+```
+
+## Conclusion of Data Exploration
+Data exploration identified 8 predictors as candidates for either imputation or removal from the data set.  Missing data was addressed by removing 21 of 591 rows (3.56%) and imputing data for the 3 variables that remained with missing values.  In addition, several **Performance** and **Demographic** predictors were discovered that highly correlate to *SPHS_OFFERS*.  Notable among the **Demographic** predictors were those describing a school's racial composition which appears to be a key determinant in SPHS underrepresentation.  
+
+Underrepresentation in particular is shown by *PCT_BLACK* and *PCT_HISPANIC* negatively correlating with *SPHS_OFFERS* while *PCT_ASIAN* and *PCT_WHITE* positively correlate and strongly so.  Since *SPHS_APPLICANTS* are self-selecting and underrepresented students in non-feeder schools do score highly on the NY State tests, the implication the NY State tests are a viable alternative to the SHSAT as the determinant of SPHS.  This will be explored further in during the model building phase.
+
+Finally, *COMMUNITY_SCHOOL* was eliminated as a predictor variable based on it lacking enough data variation to inform a model.
+
+\newpage
+
+***
+
+# Part 2: Data Preparation
+
+Data Preparation efforts focused on variable relationships and considered the possibility of transforming one or more of the predictor variables with skewed distributions.  It was decided not to apply any such transforms prior to model building since normal distributions aren't necessarily required for logistical regression modeling. Transforms can be applied if the marginal model plots for a logistic regression model show evidence of deviance between the modeled data and the actual data, but aren't required prior to model building.
+
+## Step 1: Imputing Data
+
+During data exploration, work showed evidence of 570 out of 591 school records with complete data sets that could be used for modelling.  Within the remaining records three variables: *INCOME*, *PTRATIO* AND *CLASS_SIZE* had missing data that was imputed using GLM modeling. Use of the standard predict function to deduce the imputed values was chosen to anomolies of overconcentrated values in the resulting distributions.
+
+Missing values were imputed for *INCOME*, *CLASS_SIZE*, and *PTRATIO* variables using a linear regression approach recommended by Faraway (p.201) and Fox (p.611). We are not using the mean or median as a replacement value for imputation since regression yields values that are much more consistent with the actual distribution of the data without introducing bias.
+
+## Step 2: Converting Categorical Variables to Factors
+
+**Data Type Analysis** reveals that the predictors *DBN*, *DISTRICT*, *BOROUGH*, *ZIP*, *COMMUNITY_SCHOOL* and *SPHS_FEEDER* are all either binary or categorical variables and are transformed to factors. *DBN* is simply the unique identifier of each school and was converted to a factor.  *BOROUGH* is a subset of *DBN* coded as one of the 5 NYC Boroughs K Brooklyn, M Manhattan, Q Queens, R Bronx and X Staten Island and converted to a factor.  *ZIP* although nominally numeric is actually a non-ranked catagorical varable but converted to a numeric to show data in histogram form.  *COMMUNITY_SCHOOL* is a catagorical binary variable but with very little variation in data.  It was therefore removed from the dataset. *SPHS_FEEDER* is a binary catagorical variable based upon conversion of *SPHS_OFFERS* and indicates whether a school has greater than or less then 5 SPHS offers. The *SPHS_FEEDER* variable was transformed via simple threshholding where all greater-than-zero values were converted to '1', yielding the following interpretation:
+
+-  __SPHS_OFFERS__ n = 0: the school has __no__ 0-5 SPHS offers.
+-  __SPHS_OFFERS__ n = 1: the schools __has__ greater than 5 SPHS offers.
+
+## Step 3: Addressing Zero-Inflated skew
+
+The **BEHAVIORAL**  and **PERFORMANCE** predictor catagories which represent "*survey responses on academic related attributes of schools*" and "*high scoring test percentages of schools* respectively." The analysis of the variable's boxplots indicate non-responses to survey questions showing up as excessive zeroes.  The two parts of the a zero-inflated model are a binary model, usually a logit model to which processes the zero outcome and a non-zero outcome that is associated with and a count model.
+
+***
+
+# Part 3: Model Building
+
+### Modelling Binomial Logistic Distributions
+
+Two distinct binary logistic regression models were constructed for purposes of predicting whether or not a school was likely to be an SPHS feeder. The models' performance metrics were subsequently compared against each other to allow for selection of the "best" binary logistic regression model for purposes of making predictions of SPHS feeders for the Evaluation data set. Both models used the data set's __SPHS_FEEDER__ attribute as the dependent response variable, while various subsets of the potential predictor variables were used as independent variables. A detailed discussion of the models can be found in the following section.
+
+### Modelling Count Distributions
+
+__*Response Variable is a Count:*__ This indicates that the model selection process favors a distribution that uses discrete positive integers dispersed in a way that fits the TARGET distribution.
+
+__*Poisson regression:*__ Poisson regression is often used for modeling count data because it uses a no_n-negative distribution that only puts mass at integer values.  In addition it favors data that is not over-dispersed since variance is bound by the mean.
+
+__*Negative binomial regression:*__ Negative binomial regression can be used for over-dispersed count data, that is when the conditional variance exceeds the conditional mean. It can be considered as a generalization of Poisson regression since it has the same mean structure as Poisson regression and it has an extra parameter to model the over-dispersion. If the conditional distribution of the outcome variable is over-dispersed, the confidence intervals for Negative binomial regression are likely to be narrower as compared to those from a Poisson regression.
+
+__*Quasi-Poisson model:*__ Another way of dealing with over-dispersion is to use the mean regression function and the variance function from the Poisson GLM but to leave the dispersion parameter unrestricted. Thus, dispersion the parameter is not assumed to be fixed at 1 but is estimated from the data. This strategy leads to the same coefficient estimates as the standard Poisson model but inference is adjusted for over-dispersion.
+
+__*Zero-inflated regression model:*__ Zero-inflated models attempt to account for excess zeros. In other words, two kinds of zeros are thought to exist in the data, "true zeros" and "excess zeros". Zero-inflated models estimate two equations simultaneously, one for the count model and one for the excess zeros.  OLS regression - Count outcome variables are sometimes log-transformed and analyzed using OLS regression. Many issues arise with this approach, including loss of data due to undefined values generated by taking the log of zero (which is undefined) and biased estimates.
+^[https://cran.r-project.org/web/packages/pscl/vignettes/countreg.pdf]
+
+```{r, echo = FALSE}
+
+# Load R functions for model statistics
+
+accuracy <- function(actual, predicted){
+
+  # Equation to be modeled: (TP + TN) / (TP + FP + TN + FN)
+
+  # derive confusion matrix cell values
+  c.mat <- data.frame(table(actual, predicted))
+
+  # extract all four confusion matrix values from the data frame
+  TN <- as.numeric(as.character(c.mat[1,3]))
+  FN <- as.numeric(as.character(c.mat[2,3]))
+  FP <- as.numeric(as.character(c.mat[3,3]))
+  TP <- as.numeric(as.character(c.mat[4,3]))
+
+  # now calculate the required metric
+  return( (TP + TN) / (TP + FP + TN + FN) )
+}
+```
+
+```{r, echo = FALSE}
+classif.err.rate <- function(actual, predicted) {
+
+  # Equation to be modeled: (FP + FN) / (TP + FP + TN + FN)
+
+  # derive confusion matrix cell values
+  c.mat <- data.frame(table(actual, predicted))
+
+  # extract all four confusion matrix values from the data frame
+  TN <- as.numeric(as.character(c.mat[1,3]))
+  FN <- as.numeric(as.character(c.mat[2,3]))
+  FP <- as.numeric(as.character(c.mat[3,3]))
+  TP <- as.numeric(as.character(c.mat[4,3]))
+
+  # now calculate the required metric
+  return( (FP + FN) / (TP + FP + TN + FN) )
+}
+```
+
+```{r, echo = FALSE}
+precision <- function(actual, predicted) {
+
+  # Precision : the proportion of positive cases that were correctly identified.
+
+  # Equation to be modeled: TP / (TP + FP)
+
+  # derive confusion matrix cell values
+  c.mat <- data.frame(table(actual, predicted))
+
+  # extract all four confusion matrix values from the data frame
+  TN <- as.numeric(as.character(c.mat[1,3]))
+  FN <- as.numeric(as.character(c.mat[2,3]))
+  FP <- as.numeric(as.character(c.mat[3,3]))
+  TP <- as.numeric(as.character(c.mat[4,3]))
+
+  # now calculate the required metric
+  return( TP / (TP + FP) )
+}
+```
+
+```{r, echo = FALSE}
+sensitivity <- function(actual, predicted) {
+
+  # Equation to be modeled: TP / (TP + FN)
+
+  # derive confusion matrix cell values
+  c.mat <- data.frame(table(actual, predicted))
+
+  # extract all four confusion matrix values from the data frame
+  TN <- as.numeric(as.character(c.mat[1,3]))
+  FN <- as.numeric(as.character(c.mat[2,3]))
+  FP <- as.numeric(as.character(c.mat[3,3]))
+  TP <- as.numeric(as.character(c.mat[4,3]))
+
+  # now calculate the required metric
+  return( TP / (TP + FN) )
+}
+```
+
+```{r, echo = FALSE}
+specificity <- function(actual, predicted) {
+
+  # Equation to be modeled: TN / (TN + FP)
+
+  # derive confusion matrix cell values
+  c.mat <- data.frame(table(actual, predicted))
+
+  # extract all four confusion matrix values from the data frame
+  TN <- as.numeric(as.character(c.mat[1,3]))
+  FN <- as.numeric(as.character(c.mat[2,3]))
+  FP <- as.numeric(as.character(c.mat[3,3]))
+  TP <- as.numeric(as.character(c.mat[4,3]))
+
+  # now calculate the required metric
+  return( TN / (TN + FP) )
+}
+```
+
+```{r, echo = FALSE}
+F1.Score <- function(actual, predicted) {
+
+  # Equation to be modeled: ( 2 * precision * sensitivity) / (precision + sensitivity)
+
+  # now calculate the required metric
+  return( ( 2 * precision(actual, predicted) * sensitivity(actual, predicted))
+          / (precision(actual, predicted) + sensitivity(actual, predicted)) )
+}
+```
+
+## Model Preparation, 
+```{r, echo=FALSE, warnings=FALSE, message=FALSE}
+detach(se1)
+# # test set - this is a randomized selection and will result in different outcomes each time a sample is taken.
+# se1.t <- se1[sample(nrow(se1), 570 * .7), ]
+# se2.t <- se2[sample(nrow(se2), 570 * .7), ]
+# 
+# # evaluation set
+# se1.e <- se1[sample(nrow(se1), 570 * .3), ]
+# se2.e <- se2[sample(nrow(se2), 570 * .3), ]
+# 
+# ### Remove multicollinearity from the model
+# # ** * The following predictors are removed from the model because as factors, they cannot be evaluated for collinearity:  # "DBN", "SCHOOL_NAME", "BOROUGH", "ADDRESS",  "COMMUNITY_SCHOOL"
+# se1.t <- se1.t[,-c(1,2,3,5,9)]
+# se1.e <- se1.e[,-c(1,2,3,5,9)]
+# se2.t <- se2.t[,-c(1,2,3,5,9)]
+# se2.e <- se2.e[,-c(1,2,3,5,9)]
+# 
+# # write training and evalution sets for Model 1 (SHSAT) & Model 2 (NY State Test)
+# write.csv(se1.t, file = "/Users/scottkarr/IS628Fall2020/Project/Model1Training.csv", row.names = FALSE)
+# write.csv(se2.t , file = "/Users/scottkarr/IS628Fall2020/Project/Model2Training.csv", row.names = FALSE)
+# write.csv(se1.e, file = "/Users/scottkarr/IS628Fall2020/Project/Model1Evaluation.csv", row.names = FALSE)
+# write.csv(se2.e , file = "/Users/scottkarr/IS628Fall2020/Project/Model2Evaluation.csv", row.names = FALSE)
+
+# Results from one dataset sampled from training and evaluations sets. 
+url1 <- "https://raw.githubusercontent.com/scottkarr/IS628/main/Model1Training.csv"
+se1.t <- suppressWarnings(read.csv(url1, stringsAsFactors = FALSE))
+
+url2 <- "https://raw.githubusercontent.com/scottkarr/IS628/main/Model1Evaluation.csv"
+se1.e <- suppressWarnings(read.csv(url2, stringsAsFactors = FALSE))
+
+url3 <- "https://raw.githubusercontent.com/scottkarr/IS628/main/Model2Training.csv"
+se2.t <- suppressWarnings(read.csv(url3, stringsAsFactors = FALSE))
+
+url4 <- "https://raw.githubusercontent.com/scottkarr/IS628/main/Model2Evaluation.csv"
+se2.e <- suppressWarnings(read.csv(url4, stringsAsFactors = FALSE))
+```
+
+```{r, echo=FALSE}
+attach (se1.t)
+```
+
+## Model 1:  Logit Forward Selection + AIC
+
+These two binary logistic regresssion models made use of forward selection to yield the lowest AIC value possible when only statistically significant predictor variables were considered.  The forward selection process used the correlation matrix rankings from __Part 1__.  The two models both included log-transformqtions of several predictor variables which were chosen based correlation with the __SPHS_FEEDER__ response variable.  For Model 1 the response variable represents passing the SHSAT whereas Model 2 the response variable represents scoring a 4 on the NY State test.
+
+```{r, eval = TRUE, include=FALSE, echo=FALSE, warning=FALSE, fig.width = 9, fig.height = 7, echo = TRUE}
+# Use forward selection strategy to find model with lowest AIC using PREPPED data set (prepped as above)
+# iterate through predictors in descending order of correlation with target
+# avoid highly collinear predictors with each iteration
+m0 <- glm(data = se1.t, SPHS_FEEDER ~ ., family = binomial(link = "logit"))
+summary(m0)
+
+# added log(SPHS_TESTERS + 1)
+m1 <- glm(data = se1.t, SPHS_FEEDER ~ log(SPHS_TESTERS + 1) + ELA_PROF, family = binomial(link = "logit"))
+summary(m1)
+
+# added ELA_PROF
+m2 <- glm(data = se1.t, SPHS_FEEDER ~ log(SPHS_TESTERS + 1) + ELA_PROF, family = binomial(link = "logit"))
+summary(m2)
+
+# added log(PCT_WHITE + 1), removed ECONOMIC_NEED_INDX due to high p-value
+m3 <- glm(data = se1.t, SPHS_FEEDER ~ log(SPHS_TESTERS + 1) + ELA_PROF + log(PCT_WHITE + 1), family = binomial(link = "logit"))
+summary(m3)
+
+# added log(PCT_ATTENDANCE - 1), skipped log(INCOME + 1), CLASS_SIZE, log(PCT_4S_ECNDSV + 1), PCT_BLACK 
+# due to high p-value
+m4 <- glm(data = se1.t, SPHS_FEEDER ~ log(SPHS_TESTERS + 1) + ELA_PROF + log(PCT_WHITE + 1) + log(PCT_ATTENDANCE + 1), family = binomial(link = "logit"))
+summary(m4)
+
+# added log(PCT_ELL + 1), skipped log(PCT_4S_UNDRRP) due to high p-value, removed log(PCT_ATTENDANCE + 1)
+m <- glm(data = se1.t, SPHS_FEEDER ~ log(SPHS_TESTERS + 1) + ELA_PROF + log(PCT_WHITE + 1) +  log(PCT_ELL + 1), family = binomial(link = "logit"))
+summary(m)
+
+# # now plot model dynamics
+# jpeg("model1_1.png")
+# par(mfrow = c(2,2))
+#   plot(m)
+# dev.off()
+```
+
+```{r, eval = TRUE, include=FALSE, echo=FALSE, warning=FALSE, fig.width = 9, fig.height = 7, echo = TRUE}
+# Use forward selection strategy to find model with lowest AIC using PREPPED data set (prepped as above)
+# iterate through predictors in descending order of correlation with target
+# avoid highly collinear predictors with each iteration
+m0 <- glm(data = se2.t, SPHS_FEEDER ~ ., family = binomial(link = "logit"))
+summary(m0)
+
+# added ECONOMIC_NEED_INDX
+m1 <- glm(data = se2.t, SPHS_FEEDER ~ ECONOMIC_NEED_INDX, family = binomial(link = "logit"))
+summary(m1)
+
+# added PCT_BLACK
+m2 <- glm(data = se2.t, SPHS_FEEDER ~ ECONOMIC_NEED_INDX + log(PCT_BLACK + 1), family = binomial(link = "logit"))
+summary(m2)
+
+# added PTRATIO, removed ELA_PROF due to high p-ratio
+m3 <- glm(data = se2.t, SPHS_FEEDER ~ ECONOMIC_NEED_INDX  + log(PCT_ABSENCES + 1), family = binomial(link = "logit"))
+summary(m3)
+
+# added log(SPHS_TESTERS + 1), removed log(PCT_HISPANIC + 1), LATITUDE,  log(PCT_FAMILY_TIES + 1) due to high p-ratio
+m4 <- glm(data = se2.t, SPHS_FEEDER ~ ECONOMIC_NEED_INDX  + log(PCT_ABSENCES + 1) + log(SPHS_TESTERS + 1), family = binomial(link = "logit")) 
+summary(m4)
+
+# added LONGITUDE
+m5 <- glm(data = se2.t, SPHS_FEEDER ~ ECONOMIC_NEED_INDX  + log(PCT_ABSENCES + 1) + log(SPHS_TESTERS + 1) + LONGITUDE, family = binomial(link = "logit"))
+summary(m5)
+
+# added log(PCT_ELL + 1)  + , removed ECONOMIC_NEED_INDX due to high p-value
+m6 <- glm(data = se2.t, SPHS_FEEDER ~ log(PCT_ABSENCES + 1) + log(SPHS_TESTERS + 1) + LONGITUDE + log(PCT_ELL + 1), family = binomial(link = "logit"))
+summary(m6)
+
+# added log(PCT_4S_UNDRRP + 1), removed log(PCT_ELL + 1) due to high p-value
+m7 <- glm(data = se2.t, SPHS_FEEDER ~ log(PCT_ABSENCES + 1) + log(SPHS_TESTERS + 1) + LONGITUDE + log(PCT_4S_UNDRRP + 1), family = binomial(link = "logit"))
+summary(m7)
+
+# added ELL_PROF, skipped log(PCT_TRUST + 1) due to high p-value, removed log(PCT_ABSENCES + 1), PCT_FEMALE, 
+# LONGITUDE due to high p-value
+m8 <- glm(data = se2.t, SPHS_FEEDER ~ log(SPHS_TESTERS + 1) + log(PCT_4S_UNDRRP + 1) + ELA_PROF, family = binomial(link = "logit"))
+summary(m8)
+
+# added MATH_PROF, skipped log(PCT_EFFECTIVE + 1),  log(PCT_RIGOROUS + 1)due to high p-value, removed 
+# ELA_PROF due to high p-value
+m9 <- glm(data = se2.t, SPHS_FEEDER ~ log(SPHS_TESTERS + 1) + log(PCT_4S_UNDRRP + 1) + MATH_PROF, family = binomial(link = "logit"))
+summary(m9)
+
+ma <- glm(data = se2.t, SPHS_FEEDER ~ log(SPHS_TESTERS + 1) + log(PCT_4S_UNDRRP + 1) + MATH_PROF, family = binomial(link = "logit"))
+summary(ma)
+
+# now plot model dynamics
+# jpeg("model1_1.png")
+# par(mfrow = c(2,2))
+#   plot(m)
+#   plot(ma)
+# dev.off()
+```
+
+\newpage
+
+```{r, echo=FALSE, include = FALSE , fig.width = 7, fig.height = 4.5, fig.align="center", warning=FALSE}
+# Find outliers using ~ twice the average leverage
+# Avg leverage is first dotted line ~.015
+# Cutoff leverage is second dotted line ~.030
+
+# Note, the strategy in this model is forward selection and minimizing AIC
+# while maintaining all predictor p-values within .05 significance levels.
+
+# AIC minimization drove selection of outliers first, removing as many as plausible
+# while staying within customary cutoff threshold
+
+#Figure 8.13 on page 291
+par(mfrow = c(1,2), oma = c(1, 1, 0, 0), mar=c(1, 2, 0, 1) + 1 )
+
+plot(se1.t$SPHS_OFFERS,ylim=c(-3,3),xlim=c(-0.05,0.7),
+      main = "Logistic Frequency",
+      xlab = "School", ylab = "Is an SPHS Feeder (Y|N)",
+      cex.main = 1,   font.main= 2,
+      cex.sub = 0.5, font.sub = 1
+)
+
+hvalues <- influence(m)$hat
+stanresDeviance <- residuals(m)/sqrt(1-hvalues)
+
+plot( hvalues,stanresDeviance,ylim=c(-3,3),xlim=c(-0.05,0.7),
+      main = "Standardized Deviance Residuals",
+      xlab = "Leverage Values", ylab = "Std Deviance Res",
+      cex.main = 1,   font.main= 2,
+      cex.sub = 0.5, font.sub = 1
+)
+
+# NOTE: the '5' indicated here is found by adding 1 to the number of predictor variables
+# used in the final model
+abline(v=2 * 6 / nrow(se1.t),lty=2)
+#.015
+
+# Find outliers using ~ twice the average leverage
+abline(v=2 * 12 / nrow(se1.t),lty=2)
+# .030
+
+se1.t.names <- as.character(seq(1:nrow(se1.t)))
+
+# need to click on potential outliers using the mouse and then click "finish" in the plot window
+identify(hvalues, stanresDeviance, labels = se1.t.names, cex=0.75)
+```
+
+<!-- STOP -->
+<!-- Now run metrics -->
+<!-- Results say no rows to be removed -->
+
+```{r,echo=FALSE, eval=TRUE, warn.conflicts=FALSE, include = FALSE, fig.align='center', fig.width = 5, fig.height = 3}
+# Find outliers using ~ twice the average leverage
+# Avg leverage is first dotted line ~.015
+# Cutoff leverage is second dotted line ~.030
+
+# Note, the strategy in this model is forward selection and minimizing AIC
+# while maintaining all predictor p-values within .05 significance levels.
+
+# AIC minimization drove selection of outliers first, removing as many as plausible
+# while staying within customary cutoff threshold
+
+#Figure 8.13 on page 291
+par(mfrow = c(2,1), oma = c(1, 1, 0, 0), mar=c(1, 2, 0, 1) + 1 )
+
+plot(se2.t$SPHS_OFFERS,ylim=c(-3,3),xlim=c(-0.05,0.7),
+      main = "Logistic Frequency",
+      xlab = "School", ylab = "Is an SPHS Feeder (Y|N)",
+      cex.main = 1,   font.main= 2,
+      cex.sub = 0.5, font.sub = 1
+)
+
+hvalues <- influence(ma)$hat
+stanresDeviance <- residuals(ma)/sqrt(1-hvalues)
+
+plot( hvalues,stanresDeviance,ylim=c(-3,3),xlim=c(-0.05,0.7),
+      main = "Standardized Deviance Residuals",
+      xlab = "Leverage Values", ylab = "Std Deviance Res",
+      cex.main = 1,   font.main= 2,
+      cex.sub = 0.5, font.sub = 1
+)
+
+# NOTE: the '5' indicated here is found by adding 1 to the number of predictor variables
+# used in the final model
+abline(v=2 * 6 / nrow(se2.t),lty=2)
+#.015
+
+# Find outliers using ~ twice the average leverage
+abline(v=2 * 12 / nrow(se2.t),lty=2)
+# .030
+
+se2.t.names <- as.character(seq(1:nrow(se2.t)))
+
+# need to click on potential outliers using the mouse and then click "finish" in the plot window
+identify(hvalues, stanresDeviance, labels = se2.t.names, cex=0.75)
+```
+
+<!-- STOP -->
+<!-- Now run metrics -->
+<!-- Results say no rows to be removed -->
+
+\begin{center}Table 10:  Logit Model Coefficients' Performance\end{center}
+
+|   Model 1  | Variable                       |   Model 2  | Variable             
+|-----------:|-------------------------       |-----------:|-----------------------
+| -  30.5446 | Intercept                      | +  27.8199 | Intercept
+| +   2.9824 | log(SPHS_TESTERS + 1)          | -   3.5350 | log(SPHS_TESTERS + 1)
+| +   5.1919 | ELA_PROF                       | -   1.5259 | log(PCT_4S_UNDRRP + 1)
+| +   0.8371 | log(PCT_WHITE + 1)             | -   7.4528 | MATH_PROF
+| +   0.9603 | log(PCT_ELL + 1)               |            |
+
+*Note that log(x + 1) transformations will assign any 0 values that existed or were imputed to 0 in the transformation log(0 + 1) => 0.  This transformation changes the skew of log(PCT_4S_UNDRRP + 1) ~ SPHS_OFFERS and the correlation between PCT_4S_UNDRRP ~ SPHS_OFFERS.
+
+*For Level-Log Regression dy=(B1/100)%dx*
+*If we increase x by one percent, we expect y to increase by (B1/100) units of y.*
+
+```{r, eval = TRUE, include=FALSE, echo=FALSE}
+# Coefficient Interpretation
+
+# Logit model average marginal effects - use it to generate interpretable versions of coefficients
+LogitScalar <- mean(dlogis(predict(m, type = "link")))
+LogitScalar * coef(m)
+
+# Logit model predicted probabilities - yields likelihood that each eval item is '+'
+predprob.feeder <- round(predict(m, type="response"), 2)
+summary(predprob.feeder)
+
+# Percent correctly predicted values
+# NOTE: Need to create variable 'Y' for this to work - set it to response variable
+Y1.t <- se1.t[,31]
+Y1.e <- se1.e[,31]
+# https://www.machinelearningplus.com/machine-learning/logistic-regression-tutorial-examples-r/
+# end of step 4
+pred.eval1.t <- round(predict(m, se1.t, type="response"))
+pred.eval1.e <- round(predict(m, se1.e, type="response"))
+table(true = Y1.t, pred = pred.eval1.t) 
+table(true = Y1.e, pred = pred.eval1.e) 
+
+```
+
+```{r, eval = TRUE, include=FALSE, echo=FALSE}
+# Coefficient Interpretation
+
+# Logit model average marginal effects - use it to generate interpretable versions of coefficients
+LogitScalar <- mean(dlogis(predict(ma, type = "link")))
+LogitScalar * coef(ma)
+
+# Logit model predicted probabilities - yields likelihood that each eval item is '+'
+predprob.feeder <- round(predict(ma, type="response"), 2)
+summary(predprob.feeder)
+
+# Percent correctly predicted values
+# NOTE: Need to create variable 'Y' for this to work - set it to response variable
+Y2.t <- se2.t[,30]
+Y2.e <- se2.e[,30]
+# https://www.machinelearningplus.com/machine-learning/logistic-regression-tutorial-examples-r/
+# end of step 4
+pred.eval2.t <- round(predict(ma, se2.t, type="response"))
+pred.eval2.e <- round(predict(ma, se2.e, type="response"))
+table(true = Y2.t, pred = pred.eval2.t) 
+table(true = Y2.e, pred = pred.eval2.e) 
+
+```
+
+```{r, echo=FALSE, include= FALSE, fig.width = 5, fig.height = 3.75, fig.align="center", warning=FALSE}
+dat.t1 <- table(true = Y1.t, pred = pred.eval1.t)
+names(dimnames(dat.t1)) <- c("predicted", "observed")
+dat.t1
+
+dat.t2 <- table(true = Y2.t, pred = pred.eval2.t)
+names(dimnames(dat.t2)) <- c("predicted", "observed")
+dat.t2
+
+# kable(dat, caption="Confusion Matrix") %>%
+#     kable_styling()
+```
+\begin{center}Table 11:  Logit Model Performance\end{center}
+
+|   Model 1                 |  Value                      |   Model 2                 |  Value              
+|---------------------------|--------------               |---------------------------|--------------              
+| Number of Predictors      |    4                        | Number of Predictors      |    3                       
+| AIC                       |  120.4                      | AIC                       |  138.4
+| Accuracy                  |    0.9448622                | Accuracy                  |    0.9398496     
+| Classification Error Rate |    0.0551378                | Classification Error Rate |    0.0601504
+| Precision                 |    0.8658537                | Precision                 |    0.9090909
+| Sensitivity               |    0.8658537                | Sensitivity               |    0.9090909
+| Specificity               |    0.9652997                | Specificity               |    0.9550562
+| F1 Score                  |    0.8531469                | F1 Score                  |    0.9090909
+| AUC                       |    0.9156000                | AUC                       |    0.9321000
+
+Both models' statistics show a good fit although the error distribution and Q-Q diagrams also show a clear bifurcation in outcomes *0/1* for SPHS_OFFERS.  The models also don't show excessive leverage for particular datapoints.
+
+\begin{center}Plot 1:  Logit Model Dynamics\end{center}
+
+```{r,echo=FALSE, eval=TRUE, warn.conflicts=FALSE, include = TRUE, fig.align='center', fig.width = 5, fig.height = 3}
+# jpeg("model1_1.png")
+# par(mfrow = c(2,2))
+#   plot(m)
+# dev.off()
+# 
+# jpeg("model1_1a.png")
+# par(mfrow = c(2,2))
+#   plot(ma)
+# dev.off()
+
+par(mfrow = c(1,2), oma = c(1, 1, 0, 0), mar=c(1, 1, 0, 1) + .6 )
+plot(load.image("~/IS628Fall2020/Project/model1_1.png"),
+     xaxt="n",
+     yaxt="n",
+     axes=FALSE)
+     
+plot(load.image("~/IS628Fall2020/Project/model1_1a.png"),
+     xaxt="n",
+     yaxt="n",
+     axes=FALSE)
+```
+
+```{r, eval = TRUE, include=FALSE, echo=FALSE}
+# now use functions to get required statistics
+accuracy(Y1.t, pred.eval1.t)
+classif.err.rate(Y1.t, pred.eval1.t)
+precision(Y1.t, pred.eval1.t)
+sensitivity(Y1.t, pred.eval1.t)
+specificity(Y1.t, pred.eval1.t)
+F1.Score(Y1.t, pred.eval1.t)
+
+# get AUC
+rocCurve <- roc(response= Y1.t, predictor= pred.eval1.t)
+auc(rocCurve)
+
+# now use functions to get required statistics
+accuracy(Y2.t, pred.eval2.t)
+classif.err.rate(Y2.t, pred.eval2.t)
+precision(Y2.t, pred.eval2.t)
+sensitivity(Y2.t, pred.eval2.t)
+specificity(Y2.t, pred.eval2.t)
+F1.Score(Y2.t, pred.eval2.t)
+
+# get AUC
+rocCurve <- roc(response= Y2.t, predictor= pred.eval2.t)
+auc(rocCurve)
+```
+
+```{r,echo=FALSE, warn.conflicts=FALSE, include = FALSE}
+# initialize model variables & remove invalid predictors
+attach(se1.t)
+
+## initial fit of models remove, DBN, SCHOOL_NAME, ADDRESS, COMMUNITY_SCHOOL
+##SPHS_OFFERS ~ . -PCT_FAMILY_TIES - PCT_TRUST - PCT_4S_UNDRRP
+```
+
+## Models 2,3,4:  Poisson, Quasi-Poisson & Negative Binomial
+
+The Poisson models show under-dispersion (.330) for Model 1 and over-dispersion (1.248) for Model 2 which eliminates them as viable options in the selection process.  This is based on signficant dispersion of variance from 1.  As an alternive Quasi-Poisson models were fit which do not have a restrictive dispersion requirement and they yield the best RMSE fit.  Lastly Negative Binomial models were fit which also have no dispersion restrictions and have slightly higher RMSE values.
+
+\begin{center}Table 12:  Count Model Performance\end{center}
+
+| Model  | AIC     | BIC     | R2   | RMSE     | Sigma | Score_log | Dispersion
+|:------ |---------|---------|------|----------|-------|-----------|-----------
+| pm.1   |  565.40 |  649.17 | 1.00 |     3.03 |  0.57 | -0.66     |  .330
+| pm.2   | 1463.99 | 1559.72 | 1.00 |     5.63 |  1.12 | -1.77     | 1.271
+| qp.1   |         |         | 1.00 |     2.99 |  0.55 | -0.65     |   -
+| qp.2   |         |         | 1.00 |     5.59 |  1.13 | -1.77     |   -
+| nb.1   |  562.86 |  646.63 | 1.00 |     3.52 |  0.48 | -0.83     | 73.30
+| nb.2   | 1343.91 | 1423.69 | 1.00 |    21.86 |  0.74 | -1.81     | 11.85
+
+The model plots show a clear bifurcation in outcomes *0/1* for SPHS_OFFERS.  The models don't show excessive leverage for particular datapoints.
+
+\begin{center}Plot 2:  Count Model Dynamics\end{center}
+
+```{r,echo=FALSE, eval=TRUE, warn.conflicts=FALSE, include = TRUE, fig.align='center', fig.width = 7, fig.height = 7}
+## fit a poisson models
+# library(MASS)
+# pm.1 <- glm(SPHS_OFFERS ~ ., family='poisson', se1.t)
+# pm.1 <- stepAIC(pm.1, trace = F)
+# summary(pm.1)
+#
+# pm.2 <- glm(SPHS_OFFERS ~ ., family='poisson', se2.t)
+# pm.2 <- stepAIC(pm.2, trace = F)
+# summary(pm.2)
+# check_overdispersion(pm.1)
+
+# check_overdispersion(pm.2)
+# model_performance(pm.1)
+# model_performance(pm.2)
+#
+# fix overdisperssion by using quasi-poisson model
+# qp.1 <- glm(SPHS_OFFERS ~ . , family='quasipoisson', se1.t)
+# qp.2 <- glm(SPHS_OFFERS ~ . , family='quasipoisson', se2.t)
+#
+# summary(qp.1)
+# summary(qp.2)
+
+# model_performance(qp.1)
+# model_performance(qp.2)
+#
+# jpeg("model2-4.png")
+# par(mfrow = c(6,4), oma = c(1, 1, 0, 0), mar=c(1, 1, 0, 1) + 2 )
+#   plot(pm.1)
+#   plot(pm.2)
+#   plot(qp.1)
+#   plot(qp.2)
+#   plot(nb.1)
+#   plot(nb.2)
+# dev.off()
+
+plot(load.image("~/IS628Fall2020/Project/model2-4.png"),
+     xaxt="n",
+     yaxt="n",
+     axes=FALSE)
+# check_model(qp.1)
+```
+
+<!-- ## Model 3:  Negative Binomial -->
+
+<!-- | Model  |  AIC     |    BIC  | Nagelkerke's R2 | RMSE   | Sigma  | Score_log | Theta -->
+<!-- |:-------|----------|---------|-----------------|--------|--------|-----------|------------ -->
+<!-- | nb.1   |  562.86  |  646.63 | 1.00            |  3.52  |  0.48  | -0.83     | 73.30 -->
+<!-- | nb.2   | 1343.91  | 1423.69 | 1.00            | 21.86  |  0.74 |  -1.81     | 11.85 -->
+
+```{r,echo=FALSE, eval=TRUE, warn.conflicts=FALSE, include = TRUE, fig.align='center', fig.width = 5, fig.height = 5}
+## fit a negative binomial models
+# library(MASS)
+# nb.1 <- glm.nb(SPHS_OFFERS ~ ., se1.t)
+# summary(nb.1)
+# nb.1 <- stepAIC(nb.1, trace = F, maxit = 2000)
+# nb.2 <- glm.nb(SPHS_OFFERS ~ . - ELA_PROF, se2.t)
+# nb.2 <- stepAIC(nb.2, trace = F, maxit = 2000)
+# summary(nb.1)
+# summary(nb.2)
+# (Dispersion parameter for Negative Binomial(0.4158) family taken to be 1)
+
+# calculate dispersion: under-dispersed at 0.2558176
+# dp <- sum(residuals(nb.1,type="pearson")^2)/nb.1$df.res
+# dp
+#check_zeroinflation(nb.1)
+#check_zeroinflation(nb.2)
+# sum(residuals(nb.2,type="pearson")^2)/nb.2$df.res
+
+#now plot model dynamics
+# jpeg("model3_1.png")
+# par(mfrow = c(4,4), oma = c(1, 1, 0, 0), mar=c(1, 1, 0, 1) + 2 )
+#   plot(nb.1)
+#   plot(nb.2)
+# dev.off()
+
+# model_performance(nb.1)
+# model_performance(nb.2)
+# plot(load.image("~/IS628Fall2020/Project/model3_1.png"),
+#      xaxt="n",
+#      yaxt="n",
+#      axes=FALSE)
+# check_model(nb.1)
+```
+
+<!-- ## Model 4:  Zero-Inflated Poisson -->
+
+<!-- | Model | AIC     | R2   | R2 (adj.) | RMSE     | Score_log | Score_spherical -->
+<!-- |:------|---------|------|-----------|----------|-----------|---------------- -->
+<!-- | zip.1 | 1041.90 | 1.00 | 1.00      | 2.54e+06 | -1.25     | 0.04 -->
+<!-- | zip.2 | 3521.39 | 0.99 | 0.99      |    16.83 | -4.38     | 0.03 -->
+
+```{r,echo=FALSE, eval=TRUE, warn.conflicts=FALSE, include = TRUE, fig.align='center', fig.width = 5, fig.height = 5}
+## must remove low correlation variables to be able to fit a model. 
+# se1.t1 <- se1.t[,-c(2,3,4,6,21,22,23,25,27,29,31)]
+# se2.t2 <- se2.t[,-c(2,3,4,5,6,10,11,13,15,16,17,19,20,21,22,24,25,26,28,30)]
+## fit a negative binomial model, remove, DBN, SCHOOL_NAME, ADDRESS, COMMUNITY_SCHOOL
+# zip.1 <- zeroinfl(SPHS_OFFERS~.|., data=se1.t1, dist="poisson", maxit = 2000)
+# summary(zip.1)
+# zip.1 <- be.zeroinfl(zip.1, data=se1.t1, dist="poisson", alpha=0.05, trace=FALSE)
+# summary(zip.1)
+# 
+# zip.2 <-  zeroinfl(SPHS_OFFERS~.|., data=se2.t2, dist="poisson", maxit = 2000)
+# summary(zip.2)
+# 
+# zip.2 <- be.zeroinfl(zip.2, data=se2.t2, dist="poisson", alpha=0.05, trace=FALSE)
+# summary(zip.2)
+
+# calculate dispersion: over-dispersed at 1.106989
+# sum(residuals(zip.1,type = "pearson")^2) / zip.1$df.res
+# model_performance(zip.1)
+# model_performance(zip.2)
+# check_zeroinflation(zip.1)
+# check_zeroinflation(zip.2)
+
+# install.packages("countreg", repos="http://R-Forge.R-project.org")
+# library("countreg")
+# root.pm.1 <- rootogram(pm.1, style = "hanging", plot = FALSE)
+# root.zip.1 <- rootogram(zip.1, style = "hanging", plot = FALSE)
+# root.pm.2 <- rootogram(pm.2, style = "hanging", plot = FALSE)
+# root.zip.2 <- rootogram(zip.2, style = "hanging", plot = FALSE)
+
+# #now plot model dynamics
+# jpeg("model4_1.png")
+# par(mfrow = c(2,2))
+#   plot(root.pm.1)
+#   plot(root.zip.1)
+#   plot(root.pm.2)
+#   plot(root.zip.2)
+# dev.off()
+
+# plot(load.image("~/IS628Fall2020/Project/model4_1.png"),
+#      xaxt="n",
+#      yaxt="n",
+#      axes=FALSE)
+```
+
+\newpage
+
+## Models 5,6:  Zero-Inflated Poisson & Negative Binomial
+
+The final set of models test for zero inflation in the response variable *SPHS_OFFERS* which--per Section 2--represent different sources of response data for Model 1 and 2.  The Model 1 SPHS offer threshold is the number of students passing the SHSAT whereas Model 2 this threshold is based on passing the NY State test with a score of 4.  Zero-Inflation in these models, address observed excesses in the number of schools with zero offers, owing to factors other than test scores, i.e. low test taking percentages at those schools.
+
+\begin{center}Table 13:  Zero Inflated Count Model Performance\end{center}
+
+| Model  | AIC      |   R2 | R2 (adj.) |   RMSE   | Score_log | Score_spherical
+|:-------|----------|------|-----------|----------|-----------|----------------
+| zip.1  | 1041.90  | 1.00 | 1.00      | 2.54e+06 | -1.25     | 0.04
+| zip.2  | 3521.39  | 0.99 | 0.99      |    16.83 | -4.38     | 0.03
+| zinb.1 |  814.54  | 1.00 | 1.00      |    76.77 | -1.03     | 0.04
+| zinb.2 | 1801.27  | 1.00 | 1.00      |    43.96 | -2.27     | 0.03
+
+For the zero-inflated Poisson models, the predicted-to-observed ratio for Model 1 is 82% and for Model 2 is 62%
+indicating both models are likely to be underfitting zeros.  For the zero-inflated Negative Binomial models, the predicted-to-observed ratio for Model 1 is 82% and for Model 2 is 101% indicating Model 1 is likely to be underfitting zeroes whereas Model 2 is likely predicting zeroes within expected range.
+
+\begin{center}Plot 3:  Count Model Dynamics\end{center}
+
+```{r,echo=FALSE, eval=TRUE, warn.conflicts=FALSE, include = TRUE, fig.align='center', fig.width = 6, fig.height = 6}
+# zinb.1 <- zeroinfl(SPHS_OFFERS~.|., data=se1.t1, dist="negbin", maxit = 1000)
+# #summary(zinb.1)
+# zinb.1 <- be.zeroinfl(zinb.1, data=se1.t1, dist="negbin", alpha=0.05, trace=FALSE)
+# #summary(zinb.1)
+# 
+# zinb.2 <- zeroinfl(SPHS_OFFERS~.|., data=se2.t2, dist="negbin", maxit = 1000)
+# #summary(zinb.2)
+# zinb.2 <- be.zeroinfl(zinb.2, data=se2.t2, dist="negbin", alpha=0.05, trace=FALSE)
+#summary(zinb.2)
+
+# sum(residuals(zinb.1,type="pearson")^2)/zinb.1$df.res
+# model_performance(zinb.1)
+# model_performance(zinb.2)
+# check_zeroinflation(zinb.1)
+# check_zeroinflation(zinb.2)
+# install.packages("countreg", repos="http://R-Forge.R-project.org")
+# library("countreg")
+# root.nb.1 <- rootogram(nb.1, style = "hanging", plot = FALSE)
+# root.zinb.1 <- rootogram(zinb.1, style = "hanging", plot = FALSE)
+# root.nb.2 <- rootogram(nb.2, style = "hanging", plot = FALSE)
+# root.zinb.2 <- rootogram(zinb.2, style = "hanging", plot = FALSE)
+
+# #now plot model dynamics
+# jpeg("model4-5.png")
+# par(mfrow = c(4,4), oma = c(1, 1, 0, 0), mar=c(1, 1, 0, 1) + 2 )
+#   plot(root.pm.1)
+#   plot(root.pm.2)
+#   plot(root.zip.1)
+#   plot(root.zip.2)
+#   plot(root.nb.1)
+#   plot(root.nb.2)
+#   plot(root.zinb.1)
+#   plot(root.zinb.2)
+# dev.off()
+
+plot(load.image("~/IS628Fall2020/Project/model4-5.png"),
+     xaxt="n",
+     yaxt="n",
+     axes=FALSE)
+```
+
+\newpage
+
+***
+
+# Part 4:  Model Selection
+
+## Model Comparison
+
+```{r,echo=FALSE, warn.conflicts=FALSE, eval=FALSE, include = FALSE}
+#compare_performance(pm.1, qp.1, nb.1)
+#compare_performance(pm.2, qp.2, nb.2)
+#compare_performance(pm.1, qp.1, nb.1, rank = TRUE)
+#library(lmtest)-2.30     | 0.03
+#lrtest(pm.1,qp.1,nb.1,zip.1,zinb.1)
+#lrtest(pm.2,qp.2,nb.2,zip.2,zinb.2)
+```
+
+\begin{center}Table 14:  Model1 Comparison\end{center}
+
+| Model1 |   Type |     AIC |      RMSE   | Sigma     | Score_log | Score_spherical | BIC      | BF      | p
+|:-------|--------|---------|-------------|-----------|-----------|------------------|---------|---------|--------
+|   pm.1 |    glm |  565.40 |      3.03   |  0.57     | -0.66     |  0.05            | 649.17  |   1.00  |    
+|   qp.1 |    glm |         |      2.99   |  0.55     | -0.65     |  0.05            |         |   1.00  |0.550
+|   nb.1 | negbin |  562.86 |      3.52   |  0.48     | -0.83     |  0.05            | 646.63  | > 1000  | 
+|  zip.1 |  zinfl | 1041.90 |  2.54e+06   |           | -1.25     |  0.04            |         |         |         
+| zinb.1 |  zinfl |  814.54 |     76.77   |           | -1.03     |  0.03            |         |         |         
+
+\begin{center}Table 15:  Model2 Comparison\end{center}
+
+| Model2 |   Type |     AIC |      RMSE   | Sigma     | Score_log | Score_spherical  | BIC     | BF      | p
+|:-------|--------|---------|-------------|-----------|-----------|------------------|---------|---------|--------
+|   pm.2 |    glm | 1463.99 |      5.63   |      1.12 | -1.77     |  0.04            | 1559.72 |   1.00  |      
+|   qp.2 |    glm |         |      5.59   |      1.13 | -1.77     |  0.04            |         |   1.00  | 0.957
+|   nb.2 | negbin | 1343.91 |     21.86   |      0.74 | -1.81     |  0.03            | 1423.69 | > 1000  |   
+|  zip.2 |  zinfl | 3521.39 |     16.83   |           | -4.38     |  0.03            |         |         |
+| zinb.2 |  zinfl | 1801.27 |     43.96   |           | -2.27     |  0.03            |         |         |
+
+First, the structure of this output displays each model listed, followed by a table that shows each model’s degrees of freedom and loglikelihood. To the right of these values, we are given the degrees of freedom of the test statistic, the value of the test statistic, and then the p-value. 
+
+Based on the results, we will reject the null hypothesis at the .05 significance level. The p-values for Models null hypothesis would be rejected for #'s 4 & 5 and we use the least log likelihood values for both models which would be the zero-inflated negative binomial models zinb.1 & zinb.2.
+
+\begin{center}Table 16:  Model Log Liklihood Comparison\end{center}
+
+|  Model1 | #Df | LogLik  | Df  |  Chisq |  Pr(>Chisq)   | Model2 | #Df   |  LogLik  | Df  |  Chisq  |  Pr(>Chisq)  
+|:--------|-----|---------|-----|--------|---------------|:-------|-------|----------|-----|---------|-------------
+| 1       | 21  | -261.70 |     |        |               | 1      | 24    |  -707.99 |     |         |      
+| 2       | 31  |       0 |  10 |        |               | 2      | 30    |        0 |   6 |         | 
+| 3       | 21  | -260.43 | -10 |        |               | 3      | 20    |  -651.96 | -10 |         |    
+| 4       | 21  | -499.95 |   0 | 479.04 | < 2.2e-16 *** | 4      | 12    | -1748.69 |  -8 | 2193.5  | < 2.2e-16 ***
+| 5       | 14  | -393.27 |  -7 | 213.36 | < 2.2e-16 *** | 5      | 08    |  -892.63 |  -4 | 1712.1  | < 2.2e-16 ***
+
+### Binomial Logistic Regression Model Predictions
+
+Two binary logistic regression models were constructed for purposes of predicting whether SPSH offers and used the data set's __SPHS_OFFERS__ attribute as the dependent response variable, with various subsets of the potential predictor variables were used as independent variables.  These models proved to be statistically significant with similar performance statistics although Model 1 exhibited somewhat higher number of SPHS offers predicted as shown in the summary tables shown below.
+
+\newpage
+
+\begin{center}Table 17, 18:  Count Model Confusion Matrix\end{center}
+\begin{center}Training Set\end{center}
+
+
+| Model1  | Observed |                 -                  | Model2  | Observed
+|---------|-----|-----                                    |---------|-----|----
+|Predicted|   0 |  1                                      |Predicted|   0 |  1
+|---------|-----|-----                                    |---------|-----|----
+| 0       | 306 |  11                                     | 0       | 255 |  12
+| 1       |  11 |  71                                     | 1       |  12 | 120
+
+\begin{center}Evaluation Set\end{center}
+
+| Model1  | Observed |                 -                   | Model2  | Observed
+|---------|-----|-----                                    |---------|-----|----
+|Predicted|   0 |  1                                      |Predicted|   0 |  1
+|---------|-----|-----                                    |---------|-----|----
+| 0       | 128 |   4                                     | 0       | 109 |   6
+| 1       |   2 |  37                                     | 1       |   9 |  47
+
+### Zero-Inflated Negative Binomial Model Predictions
+
+Analysis of the 'SPHS_OFFERS' variable revealed that it was zero-inflated and its mean was not nearly equal to its variance, thereby allowing us to quickly rule out the use of either Poisson or standardcount regression models for purposes of predicting likely SPHS offers. Instead, a zero-negative binomial count regression model was pursued.
+
+An initial set of modeling iterations led to the removal of a few statistically insignificant predictors but yielded a model whose *SPHS_OFFERS* predictions were wildly inaccurate, with some predictions exceeding one trillion possible line items. Further investigation revealed that the 'COST' variable was the source of the problem: that variable's very large variance and outliers were causing the negative binomial model to generate wildly inaccurate predictions.
+
+\begin{center}Table 19:  Count Model Performance\end{center}
+
+|   Model 1   | Variable                       |   Model 2   | Variable             
+|------------:|-------------------------       |------------:|-----------------------
+| Count Component
+| +  9.660478 | Intercept                      | - 4.600193  | Intercept
+| -  0.035459 | PCT_ELL                        | + 0.024771  | PCT_ELL 
+| +  0.007172 | PCT_ASIAN                      | + 0.016472  | PCT_ASIAN 
+| -  0.020130 | PCT_BLACK                      | - 0.044485  | PCT_FAMILY_TIES
+| -  0.078413 | PCT_RIGOROUS                   | + 3.564050  | ELA_PROF
+| +  0.054207 | PCT_COLLABORATIVE              | + 0.430324  | Log(theta)
+| -  0.062838 | PCT_FAMILY_TIES                |             |
+| +  0.025919 | PCT_4S                         |             |
+| +  1.811568 | Log(theta)                     |             |
+| Zero Inflated Component
+| + 12.68920  | Intercept                      | + 42.23800  | Intercept
+| -  0.08351  | PCT_ASIAN                      | - 19.19000  | ELA_PROF
+| -  0.03232  | PCT_WHITE                      |             |
+| -  2.17053  | ELA_PROF                       |             |
+| -  0.14575  | CLASS_SIZE                     |             |
+
+\newpage
+### Generate SPHS Count Predictions
+1) Load training and evaluation data set
+2) Perform any necessary transforms on data
+3) Build selected negative binomial regression model
+4) Perform any necessary transforms on copy of eval data
+5) use __predict__ function to get required SPHS offers
+6) Save predicted SPHS_OFFERS data to a file
+
+```{r,echo=FALSE, eval=TRUE, warn.conflicts=FALSE, include = FALSE, fig.align='center', fig.width = 6, fig.height = 6}
+# load training set so that negative binomial model can be built
+# remove unused columns from data set
+se1.t1 <- se1.t[,-c(2,3,4,6,21,22,23,25,27,29,31)]
+se1.e1 <- se1.e[,-c(2,3,4,6,21,22,23,25,27,29,31)]
+se2.t2 <- se2.t[,-c(2,3,4,5,6,10,11,13,15,16,17,19,20,21,22,24,25,26,28,30)]
+se2.e2 <- se2.e[,-c(2,3,4,5,6,10,11,13,15,16,17,19,20,21,22,24,25,26,28,30)]
+
+attach(se1.t1)
+zinb.1 <- zeroinfl(SPHS_OFFERS~.|., data=se1.t1, dist="negbin", maxit = 1000)
+zinb.1 <- be.zeroinfl(zinb.1, data=se1.t1, dist="negbin", alpha=0.05, trace=FALSE)
+
+attach(se2.t2)
+zinb.2 <- zeroinfl(SPHS_OFFERS~.|., data=se2.t2, dist="negbin", maxit = 1000)
+zinb.2 <- be.zeroinfl(zinb.2, data=se2.t2, dist="negbin", alpha=0.05, trace=FALSE)
+
+# ---------------------------------
+# now predict ITEM_COUNT using models
+pred1.SO <- predict(zinb.1, newdata=se1.e1, type="response")
+pred2.SO <- predict(zinb.2, newdata=se2.e2, type="response")
+
+# now add predicted item count to restricted eval data set
+se1.e1$PRED_SPHS_OFFERS <- round(pred1.SO)
+se2.e2$PRED_SPHS_OFFERS <- round(pred2.SO)
+
+d2 <- bind_rows(
+  describe(se1.e1$SPHS_OFFERS),
+  describe(se1.e1$PRED_SPHS_OFFERS),
+  describe(se2.e2$SPHS_OFFERS),
+  describe(se2.e2$PRED_SPHS_OFFERS)
+)
+d2$model <- c(
+                  'Model 1 Offers',
+                  'Model 1 Predicted Offers',
+                  'Model 2 Offers',
+                  'Model 2 Predicted Offers'
+                  )
+d2 <- d2 %>% 
+      # data.frame(d2) %>%
+      # select(model, vars, n, sd, median, mean, min, max, range, skew, kurtosis, se) %>%
+      kable(caption = "Models Descriptive Statistics", booktabs=T, digits = 3) %>%
+      kable_styling(latex_options = c( "scale_down","HOLD_position"), font_size = 10)
+```
+
+write.csv files . . .
+
+  * file = "/Users/scottkarr/IS628Fall2020/Project/M1_SPHS_COUNT_PREDS.csv"
+  
+  * file = "/Users/scottkarr/IS628Fall2020/Project/M2_SPHS_COUNT_PREDS.csv"
+
+```{r, echo=FALSE}
+d2
+#library(pander)
+write.csv(se1.e1$PRED_SPHS_OFFERS, file = "/Users/scottkarr/IS628Fall2020/Project/M1_SPHS_COUNT_PREDS.csv", row.names = FALSE)
+write.csv(se2.e2$PRED_SPHS_OFFERS, file = "/Users/scottkarr/IS628Fall2020/Project/M2_SPHS_COUNT_PREDS.csv", row.names = FALSE)
+```
+
+***
+
+# Part 5: Analysis
+
+## Discussion and Conclusions
+
+The purpose of this research was to predict both the likelihood of an SPHS admissions and the anticipated number of admissions sent from feeder middle schools. Data related to 570 middle school records from the academic year 2017-18 was used as the basis for constructing and evaluating predictive models.  To faciliate predictions, two binary logistic regression model were developed with an accuracy of 94.49% and 93.98% respectively.  Model 1 (SHSAT test) predicted 41 (24%) SPHS feeder schools of 171 schools chosen at random from the data set.  Model 2 (NY State test) predicted 53 (31%) SPHS feeder schools of 171 schools chosen at random from the data set.  Perhaps the most important finding is that for Model 2, SPHS testers negatively correlates to SPHS offers.  This tells us that SPHS admissions currently originate with a few feeder middle schools that have high concentrations of offers, thus underrepresenting a more dispersed set of students that would otherwise be admitted on the basis of their NY State test scores if that was the standard.
+
+Prediction of SPHS offers led to the development of a zero inflation negative binomial regression model. A comparison between actual versus predicted offers shows a good fit for both models (Model 1: 20.0, 15.7 Model 2: 11.9, 13.3) means (Model 1: 6.1, 5.5 Model 2: 11.9, 13.3) and errors (Model 1: 1.5, 1.2 Model 2: 2.4, 2.8) for predictions.
+
+  * So it is possible--using binary Models 1 (offers based on SHSAT score) & 2 (offers based on NY State Test score)--to develop accurate predictions of SPHS feeder middle schools using factors derived from the Literature Review on high stakes testing is possible.  
+  
+  * For middle schools predicted to be SPHS feeders, the number of SPHS acceptances was able to be accurately predicted using a zero-inflated binomial model which discounts for overinflation of non-feeder schools
+  
+  * Replacing the SHSAT with the NY State test as the determinate for SPHS acceptance is shown by this study to improve acceptance rates at underrepresented schools.  The distinction between the SHSAT and NY State Test that matters is accessiblity and preparation for the test.  It should be noted that both tests measure academic merit but the SHSAT only caters to a select portion of the student population.
+  
+Using theoretical constructs as proxies in the binary logistic regression modelling allows for a variety of inferences about these theories as strategies from the research literature.  The inferences from theoretical constructs desribed in the __Literature Review__ section are discussed below:
+
+1. __Ranked Choice Analysis:__ The NYCDOE's widespread use of this algorhthim for matching students has the benefit of enhancing a students motivation to acheive when they are accepted to one of their top choice schools.  Since SPHS admissions is determined by one test, schools where students prepare for and take the test weigh heavily on SPHS acceptances.  SPHS testers do rank their choices of schools if they are able to gain entry and this competition does motivate the subset of students that are aware of the SHSAT test and who are able to prepare for it outside the standard NYCDOE curricula.  
+
+2. __Adverse Selection Analysis:__ Significant zero-inflation exists in SPHS offers skewing heavily away from underrepresented demographic groups.  Logit Model 1 confirms underrepresentation demographic groups and the “middle school effect” phenomenon that assigns a disproportionate number of SPHS admissions to just a few middle schools.  Logit Model 2 however, suggests a more dispersed population of high performing and underrepresented students that do score highly on the NY State test, likely owing to more students' access and preparation.  Broadening SPHS offers lessens the adverse selection problem where academic success is focused on only a few outperforming schools. 
+
+3. __Underrepresentation:__ Addressing underrepresentation in SPHS admissions signals that SPHS admissions is an attainable goal for high acheiving students even if they wouldn't have traditionally considered this option.  Logit Model 2 suggests that by using a more accessible test and by preparing students through the NYCDOE curricula, the issue of underrepresentation in underserved schools can be lessened.
+
+4. __Information_Theory:__ To the extent that more students are tested, more dispersed schools offer tests and schools prepare their students for the content of these tests then SPHS offers will increasingly reflect the student demographics of the city while still preserving academic merit.  This isn't despositive on factors involved in passing the exam but the models in this study shows a relationship.
+
+5. __Alignment:__ This study shows determining SPHS admissions using the test more closely aligned with the school curriculum and the ones students have more exposure to taking results in higher admissions rates among a more dispersed set of schools.
+
+6. __Motivational_Theory:__ The effects of motivation are inconclusive in this study but to the extent that students make the effort to take the SPHS admissions test is a self-selecting factor in admissions.  This observation favors the NY State test because of higher test awareness and alignment with the NYCDOE curricula.
+
+7. __Symbolism:__ This is the most subjective of theoretical constructs to measure, however the problem of underrepresentation is clearly present in the SPHS schools and is clearly addressible by reaching more underrepresented and academically capable students.  
+
+The conclusions of this study is limited to the middle schools tested in this data set during the 2018 academic year. Additional research would be required to determine whether the same conclusions might apply to other schools and other tests as the basis for admittance. Furthermore, the data provided was limited to high stakes testing at the school level and not the level of individual students.  What this study does demonstrate is a clear relationship between underrepresentation students in the SPHS admissions process and both test access and preparation.
+
+\newpage
+
+***
+
+# Part 6: Bibliography
+
+[22] Achim, Zeileis & Kleiber, Christian & Jackman, Simon. (2008). Regression Models for Count Data in R. Journal of Statistical Software. 27. 1-25. 10.18637/jss.v027.i08.  Retrieved from https://cran.r-project.org/web/packages/pscl/vignettes/countreg.pdf
+
+[7] Akerlof, George A., 1970. "The Market for "Lemons": Quality Uncertainty and the Market Mechanism," The Quarterly Journal of Economics, Oxford University Press, vol. 84(3), pages 488-500.
+
+[11] Biggs, John B.; Tang, Catherine Kim Chow (2011). Teaching for quality learning at university: what the student does. Maidenhead: McGraw-Hill. ISBN 9780335242757.
+
+[10,17,18,19] Corcoran, Sean Patrick  & E. Baker-Smith,Christine 2018. "Pathways to an Elite Education: Application, Admission, and Matriculation to New York City's Specialized High Schools," Education Finance and Policy, MIT Press, vol. 13(2), pages 256-279, Spring.
+
+[15] Deci, E.L., Koestner, R. & Ryan, R.M. (1999). A meta-analytic review of experiments examining the effects of extrinsic rewards on intrinsic motivation. Psychological Bulletin, 125, 627-668. (10)
+
+[3] Fleeter, Howard B. "The Impact of Local Tax-Based Sharing on School Finance Equity in Ohio; Implementation Issues and Comparative Analysis." Journal of Education Finance 20, no. 3 (1995): 270-301. Accessed January 16, 2021. http://www.jstor.org/stable/40703928.
+
+[9] Hastings, Justine S. & Neilson, Christopher A. & Zimmerman, Seth D., 2012. "The Effect of School Choice on Intrinsic Motivation and Academic Outcomes," NBER Working Papers 18324, National Bureau of Economic Research, Inc.
+
+[9] E. Pfaffelhuber (1972) Learning and Information Theory, International Journal of Neuroscience, 3:2, 83-88, DOI: 10.3109/0020745720914701
+
+[8,20] Przemyslaw Nowaczyk and Joydeep Roy, “Preferences and Outcomes: A Look at New York City’s Public High School Choice Process,” New York City Independent Budget Office (October 2016). 
+
+[2] "Specialized High Schools". NYC Department of Education. 2021. Retrieved January 04, 2021.
+Retrieved from https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/specialized-high-schools
+
+[5] "Test Results". NYC Department of Education. 2021. Retrieved January 04, 2021.
+Retrieved from https://infohub.nyced.org/reports/academics/test-results
+
+[13] Resnick, L. B., Rothman, R., Slattery, J. B., & Vranek, J. L. (2003-2004). Benchmarking and Alignment of Standards and Testing. Educational Assessment, 9(1-2), 1–27. https://doi.org/10.1207/s15326977ea0901&2_1
+
+[12] Smith, Calvin (Novemeber 2008).  "Design-focused evaluation".  Assessment & Evaluation in Higher Education. 33 (6): 631–645. doi:10.1080/02602930701772762. S2CID 144731064.
+
+[16] Spicer, John. Making Sense of Multivariate Data Analysis: An Intuitive Approach. India: SAGE Publications, 2005, p 135. Retrieved from http://www.sagepub.com/upm-data/5081_Spicer_Chapter_5.pdf
+
+[1,14] Supovitz, J. (2010). Is high-stakes testing working? @Penn GSE A Review of Research,
+7(2), 3-8. Retrieved from http://www.gse.upenn.edu/review/feature/supovitz
+
+[4] Supovitz, J.A. & Klein, V. (2003). Mapping a course for improved student learning: How innovative schools systematically use student performance data to guide improvement. Philadelphia, PA: Consortium for Policy Research in Wiliam, D., & Leahy, S. (2006, April). A theoretical foundation for formative assessment. Paper presented at the National Council on Measurement in Education, San Francisco.
+
+[6] Yiping, Lai (2018). Target Schools & Action Recommended for PASSNYC. Retrieved January 04, 2021. "https://www.kaggle.com/laiyipeng/target-schools-action-recommended-for-passnyc
+
+<!-- https://review.chicagobooth.edu/economics/2019/article/when-students-are-matched-schools-who-wins -->
+<!-- https://www.gse.upenn.edu/review/feature/supovitz (1) -->
+<!-- https://www.gse.upenn.edu/commentary/beyond-testing -->
+<!-- https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/specialized-high-schools (2) -->
+<!-- https://research.steinhardt.nyu.edu/scmsAdmin/media/users/sg158/PDFs/Pathways_to_elite_education/WorkingPaper_PathwaystoAnEliteEducation.pdf  -->
+<!-- https://media4.manhattan-institute.org/sites/default/files/R-RD-0419.pdf -->
+<!-- https://ibo.nyc.ny.us/iboreports/admissions-overhaul-simulating-the-outcome-under-the-mayors-plan-for-admissions-to-the-citys-specialized-high-schools-jan-2019.pdf -->
+<!-- https://review.chicagobooth.edu/economics/2019/article/when-students-are-matched-schools-who-wins -->
+<!-- https://www.nber.org/system/files/working_papers/w25096/w25096.pdf -->
+<!-- https://reader.elsevier.com/reader/sd/pii/S0167268114002431?token=5158753C7B00ADC2C90A135E159458D31C74A41D746FCDB0391DD8931EB07A28A007F2095E7A43EBCD54DD909A2783E3 -->
+<!-- https://www.nber.org/system/files/chapters/c6559/c6559.pdf  (3) -->
+<!-- https://rpubs.com/myampol/Data621_Group4_HW5 -->
+<!-- https://gspp.berkeley.edu/assets/uploads/research/pdf/schoolchoiceOct08.pdf -->
+<!-- https://www.nobelprize.org/prizes/economic-sciences/2001/popular-information/ -->
+<!-- https://www.nobelprize.org/prizes/economic-sciences/2001/akerlof/article/ -->
+<!-- https://www.theatlantic.com/education/archive/2018/06/new-york-high-schools-stuyvesant-brooklyn-bronx/562772/ -->
+<!-- https://www.newyorker.com/news/news-desk/the-complex-disadvantages-underlying-new-york-citys-specialized-high-school-dilemma -->
+<!-- https://www.fastcompany.com/90331368/nyc-students-take-aim-at-segregation-by-hacking-an-algorithm -->
+<!-- https://infohub.nyced.org/reports/school-quality/information-and-data-overview -->
+<!-- https://ibo.nyc.ny.us/iboreports/preferences-and-outcomes-a-look-at-new-york-citys-public-high-school-choice-process.pdf -->
+<!-- http://jlsp.law.columbia.edu/wp-content/uploads/sites/8/2017/03/49-Tortoriello.pdf -->
+<!-- http://www.statisticssolutions.com/assumptions-of-logistic-regression/ -->
+<!-- https://raw.githubusercontent.com/spsstudent15/2016-02-621-W1 -->
+
+***
+
+# Part 7: Data Dictionary
+
+|   Variable                 |   Description																	                                  
+|----------------------------|--------------------------------------------------------------------------------------------
+|  `DBN*`                    |  `dbn Borough Number (NYC Department of Education school identifier)`           
+|  `SCHOOL_NAME*`            |  `School Name`      	                                                          
+|  `BOROUGH*`                |  `NYC Borough M-Manhattan, K-Brooklyn, Q-Queens, X-Bronx, R-Staten Island`    
+|  `DISTRICT`                |  `School District 1-32`
+|  `ADDRESS*`                |  `Middle School Address`
+|  `ZIPCODE`                 |  `Zipcode`                            					                                
+|  `LATITUDE`                |  `Latitude`                                               						          
+|  `LONGITUDE`               |  `Longitude`                                               						          
+|  `ECONOMIC_NEED_INDX`      |  `Economic Need Index`				
+|  `COMMUNITY_SCHOOL*`       |  `Community School`				
+|  `INCOME`                  |  `School Income`									                                              
+|  `PCT_ELL`                 |  `Percent of schools English Language Learners`													        
+|  `PCT_ASIAN`               |  `Percent of schools Asian Students`          	                				        
+|  `PCT_BLACK`               |  `Percent of schools Black Students`	                          				        
+|  `PCT_HISPANIC`            |  `Percent of schools Hispanic Students`       	                				        
+|  `PCT_WHITE`               |  `Percent of schools White Students`          	                				        
+|  `PCT_ATTENDANCE`          |  `Percent of schools Attendance`              	                				        
+|  `PCT_ABSENCES`            |  `Percent of schools Absences`                	                				        
+|  `PCT_RIGOROUS`            |  `Percent Rigorous`                           	     
+|  `PCT_COLLABORATIVE`       |  `Percent Collaborative`                           	     
+|  `PCT_SUPPORTIVE`          |  `Percent Supportive`	                				                                  
+|  `PCT_EFFECTIVE`           |  `Percent Effective`	                				                                  
+|  `PCT_FAMILY_TIES`         |  `Percent Family Ties`                        	                				        
+|  `PCT_TRUST`               |  `Percent Trust`	                				                                      
+|  `PCT_4S`                  |  `Percent of school's students scoring 4s on the State tests`	                	
+|  `PCT_4S_UNDDRP`           |  `Percent of school's underrepresented students scoring 4s on State tests`      
+|  `PCT_4S_ECNDSV`           |  `Percent of school's economically disadvantaged scoring 4s on State tests`
+|  `SPHS_APPLICANTS`         |  `Number of school's students taking SHSAT (SPHS applicants)   `			          
+|  `ELA_PROF`                |  `School's average ELA school's proficiency `			                              
+|  `MATH_PROF`               |  `School's average MATH school's proficiency `			                            
+|  `CLASS_SIZE`              |  `School's class size`			                                                    
+|  `PTRATIO`                 |  `School's pupil-teacher ratio`                                        			    
+|  `PCT_FEMALE`              |  `Percent Female`                                       			                  
+|  `SPHS_TESTERS`            |  `Number of school's SPHS testers`                                   			      
+|  `SPHS_OFFERS**`           |  `Number of school's SPHS offers                                     `			    
+|  `SPHS_FEEDER**`           |  `Is middle school an SPHS feeder school (sends at least 5 students) `			    
+
+` * variables removed due to low predictive value`
+
+`** response variables`
